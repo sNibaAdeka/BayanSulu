@@ -1,0 +1,3481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bayan Sulu Kids — Бота</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --orange: #FF6B35;
+    --yellow: #FFD23F;
+    --green: #4CAF50;
+    --blue: #2196F3;
+    --purple: #9C27B0;
+    --bg: #FFF8F0;
+    --card: #FFFFFF;
+    --text: #2D1B00;
+    --accent: #FF6B35;
+    --shadow: 0 4px 20px rgba(255,107,53,0.15);
+  }
+
+  body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ───── SCREENS ───── */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ───── HEADER ───── */
+  .top-bar {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .coins-display {
+    background: linear-gradient(135deg, #FFD23F, #FF6B35);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 2px 10px rgba(255,210,63,0.4);
+  }
+  .lang-btn {
+    background: white;
+    border: 2px solid var(--orange);
+    color: var(--orange);
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .back-btn {
+    background: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ───── KAMBOT ───── */
+  .kambot {
+    width: 140px;
+    height: 140px;
+    margin: 10px auto;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* ───── BUTTONS ───── */
+  .btn {
+    background: linear-gradient(135deg, var(--orange), #FF8C42);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 16px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255,107,53,0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    width: 100%;
+    max-width: 320px;
+    margin: 6px 0;
+  }
+  .btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(255,107,53,0.3); }
+  .btn-secondary {
+    background: white;
+    color: var(--orange);
+    border: 2px solid var(--orange);
+    box-shadow: none;
+  }
+  .btn-green { background: linear-gradient(135deg, #4CAF50, #66BB6A); }
+  .btn-purple { background: linear-gradient(135deg, #9C27B0, #AB47BC); }
+  .btn-blue { background: linear-gradient(135deg, #2196F3, #42A5F5); }
+  .btn-sm {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 16px;
+    max-width: none;
+  }
+
+  /* ───── CARD ───── */
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 480px;
+    margin: 8px 0;
+  }
+
+  /* ───── TITLES ───── */
+  h1 { font-size: 28px; font-weight: 800; color: var(--text); text-align: center; line-height: 1.2; }
+  h2 { font-size: 22px; font-weight: 700; color: var(--text); }
+  h3 { font-size: 18px; font-weight: 700; color: var(--text); }
+  p { color: #666; line-height: 1.5; }
+
+  /* ───── INPUT ───── */
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid #FFD23F;
+    border-radius: 16px;
+    font-size: 18px;
+    outline: none;
+    background: #FFFDF0;
+    margin: 8px 0;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--orange); }
+
+  /* ───── ONBOARDING ───── */
+  #screen-onboarding { background: linear-gradient(180deg, #FFF3E0 0%, #FFF8F0 100%); }
+  .speech-bubble {
+    background: white;
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    margin-bottom: 20px;
+    max-width: 320px;
+    text-align: center;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 12px solid transparent;
+    border-top-color: white;
+    border-bottom: none;
+  }
+  .age-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .age-btn {
+    background: white;
+    border: 2px solid #FFD23F;
+    border-radius: 16px;
+    padding: 14px 8px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+  .age-btn.selected, .age-btn:active { background: var(--yellow); border-color: var(--orange); transform: scale(1.05); }
+
+  /* ───── MAP SCREEN ───── */
+  #screen-map { background: linear-gradient(180deg, #87CEEB 0%, #98FB98 50%, #F4A460 100%); }
+  .map-container {
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    margin: 10px 0;
+  }
+  .map-svg-wrap {
+    width: 100%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 24px;
+    padding: 10px;
+    backdrop-filter: blur(4px);
+  }
+  .location-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin: 8px 0;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+    border: 2px solid transparent;
+  }
+  .location-card:active, .location-card.active { transform: scale(0.98); border-color: var(--orange); }
+  .location-icon { font-size: 36px; }
+  .location-locked { opacity: 0.5; cursor: not-allowed; }
+  .lock-badge {
+    margin-left: auto;
+    background: #999;
+    color: white;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .open-badge {
+    margin-left: auto;
+    background: var(--green);
+    color: white;
+    border-radius: 12px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  /* ───── LOCATION DETAIL ───── */
+  .game-list { width: 100%; max-width: 480px; }
+  .game-item {
+    background: white;
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    margin: 10px 0;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+  .game-item:active { transform: scale(0.97); }
+  .game-icon { font-size: 40px; }
+  .game-info h3 { margin-bottom: 4px; }
+  .game-info p { font-size: 13px; }
+  .game-stars { font-size: 14px; margin-top: 4px; }
+
+  /* ───── MEMORY GAME ───── */
+  #screen-game-memory { background: linear-gradient(180deg, #E3F2FD 0%, #FFF8F0 100%); }
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    margin: 16px 0;
+  }
+  .memory-card {
+    aspect-ratio: 1;
+    border-radius: 16px;
+    cursor: pointer;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .memory-card.flipped { transform: rotateY(180deg); }
+  .memory-card.matched { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    font-size: 32px;
+  }
+  .card-front {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42);
+    box-shadow: 0 3px 10px rgba(255,107,53,0.3);
+    font-size: 28px;
+    color: white;
+    font-weight: 900;
+  }
+  .card-back {
+    background: white;
+    border: 2px solid #FFD23F;
+    transform: rotateY(180deg);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+  .card-back.matched-bg { background: #E8F5E9; border-color: var(--green); }
+  .game-status {
+    text-align: center;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 600;
+    margin: 8px 0;
+  }
+  .timer-bar-wrap { width: 100%; max-width: 400px; background: #eee; border-radius: 10px; height: 12px; margin: 8px 0; }
+  .timer-bar { height: 12px; background: linear-gradient(90deg, var(--green), var(--yellow)); border-radius: 10px; transition: width 1s linear; }
+
+  /* ───── KAZAKH WORDS GAME ───── */
+  #screen-game-words { background: linear-gradient(180deg, #F3E5F5 0%, #FFF8F0 100%); }
+  .word-card {
+    background: linear-gradient(135deg, #9C27B0, #AB47BC);
+    color: white;
+    padding: 30px 40px;
+    border-radius: 28px;
+    font-size: 36px;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(156,39,176,0.4);
+    margin: 16px 0;
+    letter-spacing: 1px;
+  }
+  .word-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin: 10px 0;
+  }
+  .word-option {
+    background: white;
+    border: 2px solid #E1BEE7;
+    border-radius: 20px;
+    padding: 20px 10px;
+    font-size: 36px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+  }
+  .word-option:active { transform: scale(0.95); }
+  .word-option.correct { background: #E8F5E9; border-color: var(--green); animation: pulse-green 0.5s; }
+  .word-option.wrong { background: #FFEBEE; border-color: #F44336; animation: shake 0.4s; }
+  @keyframes pulse-green { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  .score-bar { display: flex; gap: 8px; margin: 10px 0; }
+  .score-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid #ddd;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+  .score-dot.correct { background: var(--green); border-color: var(--green); color: white; }
+  .score-dot.wrong { background: #F44336; border-color: #F44336; color: white; }
+
+  /* ───── COUNTING GAME ───── */
+  #screen-game-count { background: linear-gradient(180deg, #E8F5E9 0%, #FFF8F0 100%); }
+  .candies-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 360px;
+    margin: 16px 0;
+    min-height: 120px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 20px;
+    padding: 16px;
+  }
+  .candy-emoji { font-size: 32px; animation: pop-in 0.3s ease; }
+  @keyframes pop-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .count-question {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    margin: 10px 0;
+  }
+  .count-question h2 { font-size: 24px; color: var(--text); margin-bottom: 12px; }
+  .count-answers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .count-answer {
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 28px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(76,175,80,0.3);
+    transition: all 0.2s;
+  }
+  .count-answer:active { transform: scale(0.95); }
+  .count-answer.wrong { background: linear-gradient(135deg, #F44336, #EF5350); }
+  .count-answer.correct { background: linear-gradient(135deg, #FFD23F, #FF6B35); animation: pulse-green 0.5s; }
+
+  /* ───── REWARDS ───── */
+  #screen-rewards { background: linear-gradient(180deg, #FFF9C4 0%, #FFF8F0 100%); }
+  .coins-big {
+    font-size: 72px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD23F, #FF6B35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    line-height: 1;
+  }
+  .progress-wrap { width: 100%; max-width: 400px; margin: 12px 0; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-bottom: 6px; }
+  .progress-bar-bg { background: #eee; border-radius: 12px; height: 16px; }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, var(--yellow), var(--orange));
+    height: 16px;
+    border-radius: 12px;
+    transition: width 0.6s ease;
+  }
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin: 12px 0;
+  }
+  .badge-item {
+    background: white;
+    border-radius: 20px;
+    padding: 16px 8px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border: 2px solid #FFD23F;
+  }
+  .badge-item.locked { opacity: 0.4; filter: grayscale(1); border-color: #ddd; }
+  .badge-emoji { font-size: 36px; }
+  .badge-name { font-size: 11px; color: #888; margin-top: 4px; font-weight: 600; }
+  .recent-rewards { width: 100%; max-width: 400px; }
+  .reward-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 16px;
+    margin: 6px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .reward-row span:last-child { margin-left: auto; color: var(--orange); font-weight: 700; }
+
+  /* ───── SHOP ───── */
+  #screen-shop { background: linear-gradient(180deg, #E8EAF6 0%, #FFF8F0 100%); }
+  .shop-item {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 10px 0;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 480px;
+  }
+  .shop-icon { font-size: 48px; }
+  .shop-info { flex: 1; }
+  .shop-info h3 { font-size: 16px; margin-bottom: 4px; }
+  .shop-info p { font-size: 13px; color: #888; }
+  .shop-price {
+    background: linear-gradient(135deg, #FFD23F, #FF6B35);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .shop-price.redeemed { background: var(--green); }
+  .conversion-card {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42);
+    color: white;
+    border-radius: 24px;
+    padding: 20px 24px;
+    width: 100%;
+    max-width: 480px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .conversion-card h3 { color: white; margin-bottom: 8px; }
+  .conversion-card p { color: rgba(255,255,255,0.9); font-size: 14px; }
+  .conversion-rate { font-size: 28px; font-weight: 800; margin: 10px 0; }
+
+  /* ───── PARENT MODE ───── */
+  #screen-parent { background: linear-gradient(180deg, #E3F2FD 0%, #FFF8F0 100%); }
+  .pin-display { display: flex; gap: 12px; justify-content: center; margin: 16px 0; }
+  .pin-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--orange);
+    background: white;
+    transition: background 0.2s;
+  }
+  .pin-dot.filled { background: var(--orange); }
+  .pin-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 280px;
+    margin: 10px auto;
+  }
+  .pin-key {
+    background: white;
+    border: 2px solid #FFD23F;
+    border-radius: 18px;
+    padding: 18px;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .pin-key:active { transform: scale(0.93); background: #FFF3E0; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .stat-row:last-child { border: none; }
+  .stat-label { font-size: 15px; color: #555; }
+  .stat-value { font-size: 15px; font-weight: 700; color: var(--text); }
+  .timer-selector { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .timer-opt {
+    background: white;
+    border: 2px solid #FFD23F;
+    border-radius: 14px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+  .timer-opt.selected { background: var(--yellow); border-color: var(--orange); }
+
+  /* ───── GAME RESULT ───── */
+  .result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+  }
+  .result-overlay.show { display: flex; }
+  .result-card {
+    background: white;
+    border-radius: 32px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.4s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .result-emoji { font-size: 80px; line-height: 1; margin-bottom: 12px; }
+  .coins-earned { font-size: 40px; font-weight: 800; color: var(--orange); margin: 10px 0; }
+
+  /* ───── DAILY REWARD ───── */
+  .daily-card {
+    background: linear-gradient(135deg, #FFD23F, #FF6B35);
+    border-radius: 24px;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    width: 100%;
+    max-width: 480px;
+    margin: 10px 0;
+  }
+  .daily-card h3 { color: white; font-size: 18px; }
+
+  /* ───── TOAST ───── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 200;
+    transition: transform 0.4s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ───── BOTTOM NAV ───── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    border-top: 1px solid #F0F0F0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #aaa;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    background: none;
+  }
+  .nav-item.active { color: var(--orange); }
+  .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; }
+  .spacer { height: 70px; }
+
+  /* ───── SCROLLABLE ───── */
+  .scroll-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 16px;
+  }
+
+  /* ───── SCREEN TRANSITIONS ───── */
+  .screen { transition: opacity 0.25s ease; }
+  .screen.slide-out { animation: slideOut 0.25s ease forwards; }
+  .screen.slide-in  { animation: slideIn  0.25s ease forwards; }
+  @keyframes slideOut { to { opacity:0; transform: translateX(-30px); } }
+  @keyframes slideIn  { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+
+  /* ───── BUTTON RIPPLE ───── */
+  .btn { position: relative; overflow: hidden; }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.4s, opacity 0.4s;
+  }
+  .btn:active::after { transform: scale(2); opacity: 0; transition: 0s; }
+
+  /* ───── KAMBOT POPUP ───── */
+  #kambot-popup {
+    position: fixed;
+    bottom: 85px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    max-width: 320px;
+    width: 90%;
+  }
+  #kambot-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #kambot-popup .kb-avatar { width: 56px; height: 56px; flex-shrink: 0; animation: float 3s ease-in-out infinite; }
+  #kambot-popup .kb-bubble {
+    background: white;
+    border-radius: 18px 18px 18px 4px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    line-height: 1.4;
+  }
+
+  /* ───── CONFETTI CANVAS ───── */
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 400;
+  }
+
+  /* ───── COIN BURST ───── */
+  .coin-burst {
+    position: fixed;
+    font-size: 28px;
+    z-index: 401;
+    pointer-events: none;
+    animation: coinFly 1s ease-out forwards;
+  }
+  @keyframes coinFly {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+  }
+
+  /* ───── CHEST SCREEN ───── */
+  #screen-chest { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+  .chest-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 20px;
+  }
+  .chest-emoji {
+    font-size: 120px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 0 30px #FFD23F);
+    animation: chestPulse 2s ease-in-out infinite;
+  }
+  @keyframes chestPulse {
+    0%,100% { transform: scale(1); filter: drop-shadow(0 0 20px #FFD23F); }
+    50%      { transform: scale(1.06); filter: drop-shadow(0 0 40px #FF6B35); }
+  }
+  .chest-emoji.opening { animation: chestOpen 0.6s ease forwards; }
+  @keyframes chestOpen {
+    0%   { transform: scale(1) rotate(0deg); }
+    30%  { transform: scale(1.2) rotate(-5deg); }
+    60%  { transform: scale(1.4) rotate(5deg); }
+    100% { transform: scale(0) rotate(20deg); opacity:0; }
+  }
+  .chest-tap-hint {
+    color: rgba(255,255,255,0.7);
+    font-size: 16px;
+    font-weight: 600;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .stars-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star-particle {
+    position: absolute;
+    font-size: 18px;
+    animation: starFloat linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes starFloat {
+    from { transform: translateY(100vh) rotate(0deg); opacity:0.6; }
+    to   { transform: translateY(-10vh) rotate(360deg); opacity:0; }
+  }
+
+  /* ───── QR SCREEN ───── */
+  #screen-qr { background: linear-gradient(180deg, #E8F5E9 0%, #FFF8F0 100%); }
+  .qr-viewfinder {
+    width: 240px;
+    height: 240px;
+    border: 3px solid var(--orange);
+    border-radius: 24px;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+    background: rgba(0,0,0,0.05);
+  }
+  .qr-viewfinder::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    animation: scanLine 2s ease-in-out infinite;
+  }
+  @keyframes scanLine {
+    0%   { top: 0; }
+    50%  { top: calc(100% - 3px); }
+    100% { top: 0; }
+  }
+  .qr-corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--orange);
+    border-style: solid;
+  }
+  .qr-corner.tl { top: 8px; left: 8px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+  .qr-corner.tr { top: 8px; right: 8px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+  .qr-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+  .qr-corner.br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+  .qr-success-badge {
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-size: 18px;
+    font-weight: 800;
+    display: none;
+    text-align: center;
+    animation: popIn 0.4s ease;
+  }
+  @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+
+  /* ───── PROMO CODE CARD ───── */
+  .promo-card {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-radius: 24px;
+    padding: 24px;
+    color: white;
+    text-align: center;
+    width: 100%;
+    max-width: 380px;
+    margin: 12px 0;
+    border: 2px dashed rgba(255,210,63,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .promo-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(transparent 0deg, rgba(255,210,63,0.05) 60deg, transparent 120deg);
+    animation: rotateBg 4s linear infinite;
+  }
+  @keyframes rotateBg { to { transform: rotate(360deg); } }
+  .promo-code-text {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: #FFD23F;
+    font-family: 'Courier New', monospace;
+    margin: 12px 0;
+    text-shadow: 0 0 20px rgba(255,210,63,0.6);
+  }
+  .promo-discount { font-size: 48px; font-weight: 900; color: #4CAF50; margin: 8px 0; }
+  .promo-qr-icon { font-size: 60px; margin: 8px 0; }
+
+  /* ───── NAV ACTIVE INDICATOR ───── */
+  .nav-item.active .nav-icon { transform: scale(1.2); }
+  .nav-item { transition: color 0.2s; }
+  .nav-item .nav-icon { transition: transform 0.2s; display: block; }
+
+  /* ───── LOCATION CARD HOVER ───── */
+  .location-card:not(.location-locked) { transition: transform 0.18s, box-shadow 0.18s; }
+  .location-card:not(.location-locked):hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 28px rgba(255,107,53,0.22); }
+  .game-item:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 8px 24px rgba(255,107,53,0.18); }
+
+  /* ───── LEVEL UP OVERLAY ───── */
+  #levelup-overlay {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    z-index:500;
+    align-items:center;
+    justify-content:center;
+  }
+  #levelup-overlay.show { display:flex; animation: fadeIn 0.3s; }
+  .levelup-card {
+    background: linear-gradient(135deg, #FFD23F, #FF6B35);
+    border-radius: 32px;
+    padding: 48px 36px;
+    text-align: center;
+    color: white;
+    animation: slideUp 0.4s ease;
+    max-width: 320px;
+    width: 90%;
+  }
+  .levelup-num { font-size: 80px; font-weight: 900; line-height: 1; }
+
+  /* ───── STREAK BADGE ───── */
+  .streak-badge {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42);
+    color: white;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ════════ SMOOTH TRANSITIONS ════════ */
+  .screen {
+    will-change: opacity, transform;
+    transition: none;
+  }
+  @keyframes screenEnter {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+  @keyframes screenExit {
+    from { opacity: 1; transform: translateY(0)   scale(1); }
+    to   { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  }
+  .screen.entering { animation: screenEnter 0.32s cubic-bezier(0.22,1,0.36,1) both; }
+  .screen.exiting  { animation: screenExit  0.2s  cubic-bezier(0.4,0,1,1)      both; }
+
+  /* smooth buttons */
+  .btn, .game-item, .location-card, .age-btn, .word-option, .count-answer, .pin-key, .timer-opt, .shop-price, .nav-item {
+    transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.15s ease,
+                background 0.18s ease,
+                opacity 0.15s ease;
+  }
+  .btn:hover        { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,107,53,0.35); }
+  .btn:active       { transform: scale(0.95) translateY(0); }
+  .game-item:hover  { transform: translateX(4px); }
+  .game-item:active { transform: scale(0.97); }
+  .location-card:not(.location-locked):hover  { transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 30px rgba(255,107,53,0.2); }
+  .location-card:not(.location-locked):active { transform: scale(0.97); }
+
+  /* ════════ QUEST MAP ════════ */
+  #screen-map { background: linear-gradient(170deg,#1a3a5c 0%,#1e5f74 40%,#2d8c5e 80%,#4aa86b 100%); min-height:100vh; }
+  .quest-map-wrap { width:100%; max-width:480px; position:relative; padding:10px 0 20px; }
+
+  .quest-path {
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 6px;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 12px, transparent 12px, transparent 22px);
+    border-radius: 3px;
+    z-index: 0;
+  }
+
+  .quest-node {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 12px 0;
+    cursor: pointer;
+  }
+  .quest-node.right { flex-direction: row-reverse; }
+  .quest-node.right .quest-card { margin-right: 0; margin-left: auto; text-align: right; }
+
+  .quest-bubble {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+    border: 3px solid rgba(255,255,255,0.5);
+    position: relative;
+  }
+  .quest-bubble.open    { background: linear-gradient(135deg,#FFD23F,#FF6B35); animation: questPulse 2.5s ease-in-out infinite; }
+  .quest-bubble.done    { background: linear-gradient(135deg,#4CAF50,#2E7D32); }
+  .quest-bubble.locked  { background: rgba(255,255,255,0.15); filter: grayscale(0.5); cursor: not-allowed; }
+  .quest-bubble:active:not(.locked) { transform: scale(0.9); }
+
+  @keyframes questPulse {
+    0%,100% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(255,210,63,0.5); }
+    50%      { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 12px rgba(255,210,63,0); }
+  }
+
+  .quest-card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 18px;
+    padding: 10px 14px;
+    flex: 1;
+    max-width: 200px;
+  }
+  .quest-card h4 { color: white; font-size: 14px; margin-bottom: 2px; }
+  .quest-card p  { color: rgba(255,255,255,0.75); font-size: 11px; }
+  .quest-card .quest-reward { color: #FFD23F; font-size: 12px; font-weight: 700; margin-top: 4px; }
+
+  .quest-done-check {
+    position: absolute;
+    top: -4px; right: -4px;
+    background: #4CAF50;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; border: 2px solid white;
+  }
+  .quest-lock-icon {
+    position: absolute;
+    bottom: -4px; right: -4px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+
+  /* ════════ COMBO BANNER ════════ */
+  #combo-banner {
+    position: fixed;
+    top: 60px; left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: linear-gradient(135deg,#FF6B35,#FFD23F);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 18px;
+    font-weight: 800;
+    z-index: 600;
+    box-shadow: 0 8px 24px rgba(255,107,53,0.4);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  #combo-banner.show { transform: translateX(-50%) translateY(0); }
+
+  /* ════════ DRAG & DROP ════════ */
+  .drag-item {
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  .drag-item.dragging { opacity: 0.55; transform: scale(0.92); cursor: grabbing; }
+  .drop-zone {
+    border: 2.5px dashed rgba(255,107,53,0.35);
+    border-radius: 18px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .drop-zone.over { border-color: #FF6B35; background: rgba(255,107,53,0.08); }
+  .drop-zone.correct-drop { border-color: #4CAF50; background: rgba(76,175,80,0.12); animation: pulse-green 0.5s; }
+  .drop-zone.wrong-drop   { border-color: #F44336; background: rgba(244,67,54,0.10); animation: shake 0.4s; }
+
+  /* ════════ GAME: SORT (drag) ════════ */
+  #screen-game-sort { background: linear-gradient(180deg,#E8F5E9 0%,#FFF8F0 100%); }
+  .sort-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:12px 0; }
+  .sort-item {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 12px;
+    font-size: 32px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    min-width: 64px;
+    text-align: center;
+    border: 2px solid #f0f0f0;
+  }
+  .sort-basket {
+    border-radius: 20px;
+    padding: 14px;
+    min-height: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ════════ GAME: REACTION ════════ */
+  #screen-game-reaction { background: linear-gradient(180deg,#FCE4EC 0%,#FFF8F0 100%); }
+  .reaction-target {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    transition: transform 0.1s;
+    border: 4px solid white;
+    position: absolute;
+    animation: targetAppear 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes targetAppear { from{transform:scale(0)} to{transform:scale(1)} }
+  .reaction-target:active { transform: scale(0.85); }
+  .reaction-arena {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    height: 340px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 24px;
+    overflow: hidden;
+    margin: 10px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .reaction-score-big {
+    font-size: 56px;
+    font-weight: 900;
+    background: linear-gradient(135deg,#FF6B35,#FFD23F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+  }
+
+  /* ════════ GAME: QUIZ STORY ════════ */
+  #screen-game-quiz { background: linear-gradient(180deg,#EDE7F6 0%,#FFF8F0 100%); }
+  .story-scene {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 440px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .story-scene .scene-art { font-size: 72px; margin: 8px 0; line-height: 1; }
+  .story-scene .scene-text { font-size: 16px; line-height: 1.6; color: var(--text); font-weight: 500; }
+  .quiz-choices { display:flex; flex-direction:column; gap:10px; width:100%; max-width:440px; margin:12px 0; }
+  .quiz-choice {
+    background: white;
+    border: 2.5px solid #E8E0FF;
+    border-radius: 18px;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .quiz-choice:hover  { border-color: #9C27B0; background: #F8F0FF; transform: translateX(4px); }
+  .quiz-choice:active { transform: scale(0.98); }
+  .quiz-choice.chosen-correct { background:#E8F5E9; border-color:#4CAF50; animation: pulse-green 0.5s; }
+  .quiz-choice.chosen-wrong   { background:#FFEBEE; border-color:#F44336; animation: shake 0.4s; }
+  .quiz-step-indicator { display:flex; gap:6px; margin:8px 0; }
+  .quiz-step-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.35); transition:all 0.3s; }
+  .quiz-step-dot.active { background:white; width:20px; border-radius:4px; }
+  .quiz-step-dot.done   { background:#4CAF50; }
+
+  /* ════════ IMPROVED MEMORY CARD ════════ */
+  .memory-card { transition: transform 0.45s cubic-bezier(0.4,0,0.2,1); }
+  .memory-card.matched .card-back {
+    animation: matchedGlow 0.6s ease;
+  }
+  @keyframes matchedGlow {
+    0%   { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); }
+    50%  { box-shadow: 0 0 0 10px rgba(76,175,80,0); }
+    100% { box-shadow: none; }
+  }
+
+  /* ════════ COMBO TEXT ════════ */
+  @keyframes comboFloat {
+    0%   { transform: translateY(0) scale(1);   opacity: 1; }
+    100% { transform: translateY(-60px) scale(1.4); opacity: 0; }
+  }
+  .combo-float {
+    position: fixed;
+    font-size: 24px;
+    font-weight: 900;
+    color: #FF6B35;
+    pointer-events: none;
+    z-index: 700;
+    animation: comboFloat 0.9s ease forwards;
+    text-shadow: 0 2px 8px rgba(255,107,53,0.4);
+  }
+
+  /* ════════ WORD CARD IMPROVED ════════ */
+  .word-card { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  .word-card.new-word { animation: wordPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes wordPop { from{transform:scale(0.75);opacity:0.5} to{transform:scale(1);opacity:1} }
+
+  /* ════════ COUNT DISPLAY ════════ */
+  .candy-emoji { display:inline-block; transition: transform 0.2s; }
+  .candy-emoji:hover { transform: scale(1.3) rotate(-5deg); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ SCREEN: ONBOARDING ══════════════════════════════════ -->
+<div class="screen active" id="screen-onboarding">
+  <div style="width:100%;max-width:480px;display:flex;justify-content:flex-end;margin-bottom:8px;">
+    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle">KZ</button>
+  </div>
+
+  <!-- KamBot SVG character -->
+  <div class="kambot">
+    <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <!-- body -->
+      <ellipse cx="70" cy="95" rx="42" ry="36" fill="#C8956C"/>
+      <!-- neck -->
+      <rect x="58" y="60" width="24" height="28" rx="12" fill="#C8956C"/>
+      <!-- head -->
+      <ellipse cx="70" cy="52" rx="30" ry="28" fill="#E5B88A"/>
+      <!-- ears -->
+      <ellipse cx="44" cy="36" rx="8" ry="12" fill="#E5B88A"/>
+      <ellipse cx="44" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+      <ellipse cx="96" cy="36" rx="8" ry="12" fill="#E5B88A"/>
+      <ellipse cx="96" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+      <!-- hump -->
+      <ellipse cx="70" cy="70" rx="18" ry="14" fill="#A0714F"/>
+      <!-- eyes -->
+      <ellipse cx="58" cy="48" rx="7" ry="8" fill="white"/>
+      <ellipse cx="82" cy="48" rx="7" ry="8" fill="white"/>
+      <circle cx="60" cy="49" r="5" fill="#2D1B00"/>
+      <circle cx="84" cy="49" r="5" fill="#2D1B00"/>
+      <circle cx="62" cy="47" r="2" fill="white"/>
+      <circle cx="86" cy="47" r="2" fill="white"/>
+      <!-- smile -->
+      <path d="M60 64 Q70 72 80 64" stroke="#A0714F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- nose -->
+      <ellipse cx="70" cy="60" rx="6" ry="4" fill="#A0714F"/>
+      <circle cx="68" cy="60" r="1.5" fill="#2D1B00"/>
+      <circle cx="72" cy="60" r="1.5" fill="#2D1B00"/>
+      <!-- scarf -->
+      <path d="M40 88 Q70 102 100 88" stroke="#FF6B35" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M100 88 L104 100" stroke="#FF6B35" stroke-width="6" stroke-linecap="round"/>
+      <!-- legs -->
+      <rect x="46" y="122" width="14" height="20" rx="7" fill="#C8956C"/>
+      <rect x="80" y="122" width="14" height="20" rx="7" fill="#C8956C"/>
+      <!-- hooves -->
+      <ellipse cx="53" cy="142" rx="8" ry="4" fill="#A0714F"/>
+      <ellipse cx="87" cy="142" rx="8" ry="4" fill="#A0714F"/>
+      <!-- star decoration -->
+      <text x="92" y="108" font-size="14">⭐</text>
+    </svg>
+  </div>
+
+  <div class="speech-bubble" id="bubble-text">
+    Привет! Я КамБот! Давай отправимся в путешествие по Казахстану! 🇰🇿
+  </div>
+
+  <!-- Step 1: Name input -->
+  <div class="card" id="onb-step1" style="max-width:360px;">
+    <h3 id="onb-name-label" style="text-align:center;margin-bottom:12px;">Как тебя зовут?</h3>
+    <input type="text" id="player-name-input" placeholder="Твоё имя" maxlength="20">
+    <button class="btn" onclick="goToAgeSelect()">Далее →</button>
+  </div>
+
+  <!-- Step 2: Age select -->
+  <div class="card" id="onb-step2" style="display:none;max-width:360px;">
+    <h3 id="onb-age-label" style="text-align:center;margin-bottom:12px;">Сколько тебе лет?</h3>
+    <div class="age-grid">
+      <button class="age-btn" onclick="selectAge(7)">7</button>
+      <button class="age-btn" onclick="selectAge(8)">8</button>
+      <button class="age-btn" onclick="selectAge(9)">9</button>
+      <button class="age-btn" onclick="selectAge(10)">10</button>
+      <button class="age-btn" onclick="selectAge(11)">11</button>
+    </div>
+    <button class="btn" id="age-confirm-btn" onclick="finishOnboarding()" style="display:none;">Поехали! 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: MAP ══════════════════════════════════ -->
+<div class="screen" id="screen-map">
+  <div class="top-bar">
+    <span style="font-size:22px;font-weight:800;color:white;text-shadow:0 2px 8px rgba(0,0,0,0.2);">Bayan Sulu Kids</span>
+    <div class="coins-display">🪙 <span id="map-coins">0</span></div>
+  </div>
+
+  <!-- Header row -->
+  <div style="width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <p style="color:white;font-size:17px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,0.25);" id="map-greeting">Привет, Игрок!</p>
+    <div style="display:flex;gap:8px;">
+      <div class="daily-card" id="daily-reward-card" onclick="goToChest()" style="margin:0;padding:8px 14px;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <span id="daily-icon" style="font-size:20px;">🎁</span>
+        <div><div id="daily-title" style="font-size:12px;font-weight:800;color:white;">Сундук</div><div id="daily-sub" style="font-size:10px;color:rgba(255,255,255,0.85);">+30 🪙</div></div>
+      </div>
+      <div onclick="showScreen('qr')" style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);border-radius:18px;padding:8px 14px;color:white;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:20px;">📦</span>
+        <div><div style="font-size:12px;font-weight:800;" id="qr-map-btn">QR</div><div style="font-size:10px;color:rgba(255,255,255,0.8);" id="qr-map-sub">+25 🪙</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── QUEST MAP ── -->
+  <div class="quest-map-wrap">
+    <div class="quest-path"></div>
+
+    <!-- Node 1: Алматы — открыто -->
+    <div class="quest-node" onclick="openLocation('almaty')">
+      <div class="quest-bubble open" id="qn-almaty">
+        ⛰️
+        <div class="quest-done-check" id="qn-almaty-check" style="display:none;">✓</div>
+      </div>
+      <div class="quest-card">
+        <h4 id="qn1-title">Алматы — Горы</h4>
+        <p id="qn1-sub">Память, слова, счёт</p>
+        <div class="quest-reward">🪙 +45 за все игры</div>
+      </div>
+    </div>
+
+    <!-- Node 2: Реакция — отдельная игра -->
+    <div class="quest-node right" onclick="startGame('reaction')">
+      <div class="quest-bubble open" id="qn-reaction">
+        ⚡
+      </div>
+      <div class="quest-card">
+        <h4 id="qn2-title">Скорость молнии</h4>
+        <p id="qn2-sub">Поймай конфеты!</p>
+        <div class="quest-reward">🪙 +20 монет</div>
+      </div>
+    </div>
+
+    <!-- Node 3: Астана — открыто -->
+    <div class="quest-node" onclick="openLocation('astana')">
+      <div class="quest-bubble open" id="qn-astana">
+        🗼
+        <div class="quest-done-check" id="qn-astana-check" style="display:none;">✓</div>
+      </div>
+      <div class="quest-card">
+        <h4 id="qn3-title">Астана — Байтерек</h4>
+        <p id="qn3-sub">Сортировка, история</p>
+        <div class="quest-reward">🪙 +40 за все игры</div>
+      </div>
+    </div>
+
+    <!-- Node 4: Квиз-история -->
+    <div class="quest-node right" onclick="startGame('quiz')">
+      <div class="quest-bubble open" id="qn-quiz">
+        📖
+      </div>
+      <div class="quest-card">
+        <h4 id="qn4-title">История КамБота</h4>
+        <p id="qn4-sub">Помоги верблюжонку!</p>
+        <div class="quest-reward">🪙 +25 монет</div>
+      </div>
+    </div>
+
+    <!-- Node 5: Туркестан — заперто -->
+    <div class="quest-node" onclick="showLockedMsg()">
+      <div class="quest-bubble locked" id="qn-turkestan">
+        🏛️
+        <div class="quest-lock-icon">🔒</div>
+      </div>
+      <div class="quest-card">
+        <h4 id="qn5-title">Туркестан</h4>
+        <p id="qn5-sub">Нужно 50 🪙</p>
+        <div class="quest-reward" style="color:rgba(255,255,255,0.5);">🔒 Закрыто</div>
+      </div>
+    </div>
+
+    <!-- Node 6: Сортировка (drag) -->
+    <div class="quest-node right" onclick="showLockedMsg()">
+      <div class="quest-bubble locked">
+        🎯
+        <div class="quest-lock-icon">🔒</div>
+      </div>
+      <div class="quest-card">
+        <h4 id="qn6-title">Сортируй!</h4>
+        <p id="qn6-sub">Нужно 50 🪙</p>
+        <div class="quest-reward" style="color:rgba(255,255,255,0.5);">🔒 Закрыто</div>
+      </div>
+    </div>
+
+    <!-- Node 7: Чарын — заперто -->
+    <div class="quest-node" onclick="showLockedMsg()">
+      <div class="quest-bubble locked" id="qn-charyn">
+        🏜️
+        <div class="quest-lock-icon">🔒</div>
+      </div>
+      <div class="quest-card">
+        <h4 id="qn7-title">Чарын — Каньон</h4>
+        <p id="qn7-sub">Нужно 100 🪙</p>
+        <div class="quest-reward" style="color:rgba(255,255,255,0.5);">🔒 Закрыто</div>
+      </div>
+    </div>
+
+    <!-- KamBot at bottom -->
+    <div style="text-align:center;margin-top:16px;position:relative;z-index:1;">
+      <div style="font-size:52px;animation:float 3s ease-in-out infinite;">🐪</div>
+      <p style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;" id="kambot-map-hint">Нажми на любую локацию!</p>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('map')"><span class="nav-icon">🗺️</span><span id="nav-map">Карта</span></button>
+    <button class="nav-item" onclick="showScreen('rewards')"><span class="nav-icon">🪙</span><span id="nav-rewards">Награды</span></button>
+    <button class="nav-item" onclick="showScreen('shop')"><span class="nav-icon">🎁</span><span id="nav-shop">Магазин</span></button>
+    <button class="nav-item" onclick="showScreen('parent')"><span class="nav-icon">👨‍👩‍👧</span><span id="nav-parent">Родители</span></button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: LOCATION DETAIL ══════════════════════════════════ -->
+<div class="screen" id="screen-location">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('map')">←</button>
+    <div class="coins-display">🪙 <span id="loc-coins">0</span></div>
+  </div>
+
+  <div style="width:100%;max-width:480px;text-align:center;margin-bottom:16px;">
+    <div id="loc-header-icon" style="font-size:60px;margin-bottom:8px;">⛰️</div>
+    <h2 id="loc-header-title">Алматы — Горы</h2>
+    <p id="loc-header-sub" style="font-size:14px;margin-top:4px;">Познакомься с природой Казахстана!</p>
+  </div>
+
+  <!-- Facts card -->
+  <div class="card" style="max-width:480px;background:linear-gradient(135deg,#FFF3E0,#FFF8F0);margin-bottom:8px;">
+    <div style="font-size:18px;">📚 <strong id="fact-label">Факт о Казахстане:</strong></div>
+    <p id="location-fact" style="margin-top:8px;font-size:14px;line-height:1.6;">Алматы — самый большой город Казахстана, у подножия гор Тянь-Шань.</p>
+  </div>
+
+  <div class="game-list">
+    <div class="game-item" onclick="startGame('memory')">
+      <span class="game-icon">🍬</span>
+      <div class="game-info">
+        <h3 id="game1-title">Найди пару!</h3>
+        <p id="game1-sub">Игра на память с конфетами Баян Сулу</p>
+        <div class="game-stars" id="game1-stars">⭐⭐⭐ +15 🪙</div>
+      </div>
+      <span style="font-size:24px;color:#ddd;">›</span>
+    </div>
+
+    <div class="game-item" onclick="startGame('words')">
+      <span class="game-icon">🔤</span>
+      <div class="game-info">
+        <h3 id="game2-title">Казахские слова</h3>
+        <p id="game2-sub">Угадай слово по картинке</p>
+        <div class="game-stars" id="game2-stars">⭐⭐ +20 🪙</div>
+      </div>
+      <span style="font-size:24px;color:#ddd;">›</span>
+    </div>
+
+    <div class="game-item" onclick="startGame('count')">
+      <span class="game-icon">🔢</span>
+      <div class="game-info">
+        <h3 id="game3-title">Считай с Ботой!</h3>
+        <p id="game3-sub">Считай конфеты вместе с КамБотом</p>
+        <div class="game-stars" id="game3-stars">⭐ +10 🪙</div>
+      </div>
+      <span style="font-size:24px;color:#ddd;">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — MEMORY ══════════════════════════════════ -->
+<div class="screen" id="screen-game-memory">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('location')">←</button>
+    <div id="mem-game-title" style="font-weight:800;font-size:18px;">Найди пару!</div>
+    <div class="coins-display">🪙 <span id="mem-coins">0</span></div>
+  </div>
+
+  <div class="game-status">
+    <span id="mem-pairs">0/8</span> пар &nbsp;|&nbsp; ⏱️ <span id="mem-timer">60</span>с
+  </div>
+  <div class="timer-bar-wrap"><div class="timer-bar" id="mem-timer-bar" style="width:100%"></div></div>
+
+  <div class="memory-grid" id="memory-grid"></div>
+
+  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px;" id="mem-hint">Нажимай на карточки, чтобы открыть их</p>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — KAZAKH WORDS ══════════════════════════════════ -->
+<div class="screen" id="screen-game-words">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('location')">←</button>
+    <div id="words-game-title" style="font-weight:800;font-size:18px;">Казахские слова</div>
+    <div class="coins-display">🪙 <span id="words-coins">0</span></div>
+  </div>
+
+  <div class="score-bar" id="score-bar"></div>
+
+  <p style="font-size:15px;color:#666;text-align:center;" id="words-instruction">Выбери правильный перевод!</p>
+  <div class="word-card" id="current-word">АПТА</div>
+
+  <div class="word-options" id="word-options"></div>
+
+  <div style="text-align:center;margin-top:8px;font-size:14px;color:#888;">
+    <span id="words-progress">Вопрос 1 из 8</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — COUNTING ══════════════════════════════════ -->
+<div class="screen" id="screen-game-count">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('location')">←</button>
+    <div id="count-game-title" style="font-weight:800;font-size:18px;">Считай с Ботой!</div>
+    <div class="coins-display">🪙 <span id="count-coins">0</span></div>
+  </div>
+
+  <div class="count-question">
+    <h2 id="count-question-text">Сколько конфет?</h2>
+    <div class="candies-display" id="candies-display"></div>
+  </div>
+
+  <div class="count-question" style="background:transparent;box-shadow:none;padding:10px 0;">
+    <div class="count-answers" id="count-answers"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:4px;font-size:14px;color:#888;">
+    <span id="count-progress">Задача 1 из 8</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: REWARDS ══════════════════════════════════ -->
+<div class="screen" id="screen-rewards">
+  <div class="top-bar">
+    <span style="font-size:20px;font-weight:800;" id="rewards-title">Мои награды</span>
+    <div class="coins-display">🪙 <span id="rew-coins">0</span></div>
+  </div>
+
+  <div class="scroll-content">
+    <div class="card" style="text-align:center;padding:30px 20px;">
+      <p style="font-size:14px;color:#888;margin-bottom:4px;" id="my-coins-label">Мои Ботакоины:</p>
+      <div class="coins-big" id="big-coins">0</div>
+      <p style="font-size:13px;color:#aaa;margin-top:8px;" id="coins-value-hint">= ~0 тенге скидки</p>
+    </div>
+
+    <!-- Progress to next level -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="lvl-current">Уровень 1</span>
+        <span id="lvl-next">до след. уровня</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div style="width:100%;max-width:480px;margin:8px 0;">
+      <h3 id="badges-title" style="margin-bottom:12px;">Мои значки:</h3>
+      <div class="badges-grid">
+        <div class="badge-item" id="badge-first">
+          <div class="badge-emoji">🏅</div>
+          <div class="badge-name" id="b1-name">Первый шаг</div>
+        </div>
+        <div class="badge-item" id="badge-memory">
+          <div class="badge-emoji">🧠</div>
+          <div class="badge-name" id="b2-name">Память</div>
+        </div>
+        <div class="badge-item locked" id="badge-words">
+          <div class="badge-emoji">🔤</div>
+          <div class="badge-name" id="b3-name">Казахский</div>
+        </div>
+        <div class="badge-item locked" id="badge-math">
+          <div class="badge-emoji">🔢</div>
+          <div class="badge-name" id="b4-name">Математик</div>
+        </div>
+        <div class="badge-item locked" id="badge-explorer">
+          <div class="badge-emoji">🗺️</div>
+          <div class="badge-name" id="b5-name">Путешественник</div>
+        </div>
+        <div class="badge-item locked" id="badge-champion">
+          <div class="badge-emoji">🏆</div>
+          <div class="badge-name" id="b6-name">Чемпион</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="recent-rewards" style="max-width:480px;">
+      <h3 id="activity-title" style="margin-bottom:10px;">Последние награды:</h3>
+      <div id="activity-log">
+        <div class="reward-row"><span>🍬</span><span id="act1">Игра «Найди пару»</span><span>+15 🪙</span></div>
+        <div class="reward-row"><span>📅</span><span id="act2">Ежедневный вход</span><span>+10 🪙</span></div>
+        <div class="reward-row"><span>🔤</span><span id="act3">Казахские слова</span><span>+20 🪙</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('map')"><span class="nav-icon">🗺️</span><span id="nav-map2">Карта</span></button>
+    <button class="nav-item active" onclick="showScreen('rewards')"><span class="nav-icon">🪙</span><span id="nav-rewards2">Награды</span></button>
+    <button class="nav-item" onclick="showScreen('shop')"><span class="nav-icon">🎁</span><span id="nav-shop2">Магазин</span></button>
+    <button class="nav-item" onclick="showScreen('parent')"><span class="nav-icon">👨‍👩‍👧</span><span id="nav-parent2">Родители</span></button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: SHOP ══════════════════════════════════ -->
+<div class="screen" id="screen-shop">
+  <div class="top-bar">
+    <span style="font-size:20px;font-weight:800;" id="shop-title">Магазин призов</span>
+    <div class="coins-display">🪙 <span id="shop-coins">0</span></div>
+  </div>
+
+  <div class="scroll-content">
+    <!-- Conversion rate -->
+    <div class="conversion-card">
+      <h3>💱 Курс Ботакоинов</h3>
+      <div class="conversion-rate">10 🪙 = 50 ₸</div>
+      <p>Обменяй монеты на скидку при покупке!</p>
+    </div>
+
+    <div class="shop-item">
+      <span class="shop-icon">🍬</span>
+      <div class="shop-info">
+        <h3 id="shop1-title">Скидка 5%</h3>
+        <p id="shop1-sub">На любую покупку Баян Сулу</p>
+        <p style="color:var(--orange);font-weight:700;font-size:13px;margin-top:4px;">~250 ₸ экономии</p>
+      </div>
+      <div class="shop-price" onclick="redeemAndShowPromo(this,50,'5%','BOTA-5OFF')" id="shop1-btn">50 🪙</div>
+    </div>
+
+    <div class="shop-item">
+      <span class="shop-icon">🎁</span>
+      <div class="shop-info">
+        <h3 id="shop2-title">Пакет «Ассорти»</h3>
+        <p id="shop2-sub">Бесплатная упаковка конфет</p>
+        <p style="color:var(--orange);font-weight:700;font-size:13px;margin-top:4px;">~500 ₸ стоимость</p>
+      </div>
+      <div class="shop-price" onclick="redeemAndShowPromo(this,100,'10%','BOTA-FREE')" id="shop2-btn">100 🪙</div>
+    </div>
+
+    <div class="shop-item">
+      <span class="shop-icon">🎀</span>
+      <div class="shop-info">
+        <h3 id="shop3-title">Подарочный набор</h3>
+        <p id="shop3-sub">Коробка конфет + игрушка КамБот</p>
+        <p style="color:var(--orange);font-weight:700;font-size:13px;margin-top:4px;">~2000 ₸ стоимость</p>
+      </div>
+      <div class="shop-price" onclick="redeemAndShowPromo(this,200,'20%','BOTA-VIP')" id="shop3-btn">200 🪙</div>
+    </div>
+
+    <div class="shop-item">
+      <span class="shop-icon">📚</span>
+      <div class="shop-info">
+        <h3 id="shop4-title">Новые уровни</h3>
+        <p id="shop4-sub">Открыть Туркестан и Чарын</p>
+        <p style="color:var(--orange);font-weight:700;font-size:13px;margin-top:4px;">Больше приключений!</p>
+      </div>
+      <div class="shop-price" onclick="redeemAndShowPromo(this,50,'5%','BOTA-LVL')" id="shop4-btn">50 🪙</div>
+    </div>
+
+    <div style="background:#F8F8F8;border-radius:16px;padding:16px;margin:10px 0;max-width:480px;width:100%;">
+      <p style="font-size:12px;color:#999;text-align:center;" id="shop-disclaimer">
+        * Промокоды применяются при покупке в магазинах-партнёрах. Скидка рассчитывается на кассе по QR-коду.
+      </p>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('map')"><span class="nav-icon">🗺️</span><span id="nav-map3">Карта</span></button>
+    <button class="nav-item" onclick="showScreen('rewards')"><span class="nav-icon">🪙</span><span id="nav-rewards3">Награды</span></button>
+    <button class="nav-item active" onclick="showScreen('shop')"><span class="nav-icon">🎁</span><span id="nav-shop3">Магазин</span></button>
+    <button class="nav-item" onclick="showScreen('parent')"><span class="nav-icon">👨‍👩‍👧</span><span id="nav-parent3">Родители</span></button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: PARENT ══════════════════════════════════ -->
+<div class="screen" id="screen-parent">
+  <div class="top-bar">
+    <span style="font-size:20px;font-weight:800;" id="parent-title">Режим родителя</span>
+    <div class="coins-display">🪙 <span id="par-coins">0</span></div>
+  </div>
+
+  <!-- PIN Lock -->
+  <div id="parent-locked">
+    <div class="card" style="text-align:center;max-width:360px;">
+      <div style="font-size:48px;margin-bottom:12px;">🔐</div>
+      <h3 id="pin-label" style="margin-bottom:16px;">Введите PIN-код</h3>
+      <div class="pin-display" id="pin-display">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinPress(1)">1</button>
+        <button class="pin-key" onclick="pinPress(2)">2</button>
+        <button class="pin-key" onclick="pinPress(3)">3</button>
+        <button class="pin-key" onclick="pinPress(4)">4</button>
+        <button class="pin-key" onclick="pinPress(5)">5</button>
+        <button class="pin-key" onclick="pinPress(6)">6</button>
+        <button class="pin-key" onclick="pinPress(7)">7</button>
+        <button class="pin-key" onclick="pinPress(8)">8</button>
+        <button class="pin-key" onclick="pinPress(9)">9</button>
+        <button class="pin-key" onclick="pinPress('C')" style="font-size:16px;">✕</button>
+        <button class="pin-key" onclick="pinPress(0)">0</button>
+        <button class="pin-key" onclick="pinPress('OK')" style="background:var(--yellow);">OK</button>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px;" id="pin-hint-text">Подсказка: 1234</p>
+    </div>
+  </div>
+
+  <!-- Parent dashboard -->
+  <div id="parent-unlocked" style="display:none;width:100%;max-width:480px;">
+    <div class="card">
+      <h3 style="margin-bottom:16px;" id="child-progress-title">📊 Прогресс ребёнка</h3>
+      <div class="stat-row">
+        <span class="stat-label" id="sl-name">Имя</span>
+        <span class="stat-value" id="sv-name">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="sl-age">Возраст</span>
+        <span class="stat-value" id="sv-age">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="sl-coins">Ботакоины</span>
+        <span class="stat-value" id="sv-coins">0 🪙</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="sl-games">Игр пройдено</span>
+        <span class="stat-value" id="sv-games">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="sl-today">Сегодня в приложении</span>
+        <span class="stat-value" id="sv-today">0 мин</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;" id="timer-title">⏱️ Лимит экранного времени</h3>
+      <div class="timer-selector">
+        <button class="timer-opt selected" onclick="setTimer(15, this)">15 мин</button>
+        <button class="timer-opt selected" onclick="setTimer(30, this)">30 мин</button>
+        <button class="timer-opt" onclick="setTimer(45, this)">45 мин</button>
+        <button class="timer-opt" onclick="setTimer(60, this)">1 час</button>
+      </div>
+      <p style="font-size:13px;color:#888;margin-top:8px;" id="timer-note">Ребёнок получит предупреждение за 5 минут до лимита.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;" id="edu-title">📚 Образовательный прогресс</h3>
+      <div class="stat-row">
+        <span class="stat-label" id="edu1-label">Казахских слов изучено</span>
+        <span class="stat-value" id="edu1-val">0 / 40</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="edu2-label">Фактов о Казахстане</span>
+        <span class="stat-value" id="edu2-val">0 / 20</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" id="edu3-label">Счёт: задач решено</span>
+        <span class="stat-value" id="edu3-val">0</span>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="lockParent()" style="max-width:480px;">🔒 Выйти из режима родителя</button>
+  </div>
+
+  <div class="spacer"></div>
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showScreen('map')"><span class="nav-icon">🗺️</span><span id="nav-map4">Карта</span></button>
+    <button class="nav-item" onclick="showScreen('rewards')"><span class="nav-icon">🪙</span><span id="nav-rewards4">Награды</span></button>
+    <button class="nav-item" onclick="showScreen('shop')"><span class="nav-icon">🎁</span><span id="nav-shop4">Магазин</span></button>
+    <button class="nav-item active" onclick="showScreen('parent')"><span class="nav-icon">👨‍👩‍👧</span><span id="nav-parent4">Родители</span></button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════ RESULT OVERLAY ══════════════════════════════════ -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-card">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <h2 id="result-title">Отлично!</h2>
+    <p id="result-subtitle">Ты заработал:</p>
+    <div class="coins-earned" id="result-coins">+15 🪙</div>
+    <p id="result-fact" style="font-size:13px;color:#888;margin:12px 0;line-height:1.5;"></p>
+    <button class="btn" onclick="closeResult()" style="margin-top:12px;">Продолжить 🚀</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — REACTION ══════════════════════════════════ -->
+<div class="screen" id="screen-game-reaction">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('map')">←</button>
+    <div style="font-weight:800;font-size:18px;">⚡ Скорость молнии</div>
+    <div class="coins-display">🪙 <span id="react-coins">0</span></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:380px;margin:4px 0 10px;">
+    <div class="reaction-score-big" id="react-score">0</div>
+    <div style="text-align:center;">
+      <div style="font-size:13px;color:#888;font-weight:600;">Времени</div>
+      <div style="font-size:28px;font-weight:800;color:var(--orange);" id="react-timer">20</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:13px;color:#888;font-weight:600;">Серия</div>
+      <div style="font-size:28px;font-weight:800;color:var(--purple);" id="react-combo">x1</div>
+    </div>
+  </div>
+  <div class="timer-bar-wrap"><div class="timer-bar" id="react-timer-bar" style="width:100%;background:linear-gradient(90deg,#FF6B35,#FFD23F);"></div></div>
+  <div class="reaction-arena" id="react-arena">
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:18px;color:#aaa;font-weight:600;" id="react-start-hint">Нажми СТАРТ!</div>
+  </div>
+  <button class="btn" id="react-start-btn" onclick="startReactionGame()">🚀 Старт!</button>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — QUIZ STORY ══════════════════════════════════ -->
+<div class="screen" id="screen-game-quiz">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('map')">←</button>
+    <div style="font-weight:800;font-size:18px;">📖 История КамБота</div>
+    <div class="coins-display">🪙 <span id="quiz-coins">0</span></div>
+  </div>
+  <div class="quiz-step-indicator" id="quiz-steps"></div>
+  <div class="story-scene" id="quiz-scene">
+    <div class="scene-art" id="quiz-art">🐪</div>
+    <div class="scene-text" id="quiz-text">КамБот отправляется в путешествие...</div>
+  </div>
+  <div class="quiz-choices" id="quiz-choices"></div>
+  <div style="font-size:13px;color:#888;text-align:center;margin-top:4px;" id="quiz-progress">Шаг 1 из 5</div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: GAME — SORT (DRAG) ══════════════════════════════════ -->
+<div class="screen" id="screen-game-sort">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('map')">←</button>
+    <div style="font-weight:800;font-size:18px;">🎯 Разложи по группам!</div>
+    <div class="coins-display">🪙 <span id="sort-coins">0</span></div>
+  </div>
+  <p style="font-size:14px;color:#666;text-align:center;margin:4px 0 10px;" id="sort-instruction">Перетащи предметы в нужную корзину</p>
+
+  <div class="sort-row" id="sort-items-row" style="min-height:80px;"></div>
+
+  <div style="display:flex;gap:14px;width:100%;max-width:440px;margin:10px 0;">
+    <div class="sort-basket drop-zone" id="sort-basket-a" style="flex:1;background:rgba(255,210,63,0.1);" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToBasket(event,'a')">
+      <div style="font-size:40px;" id="sort-basket-a-icon">🍬</div>
+      <div style="font-size:12px;font-weight:700;color:#888;text-align:center;" id="sort-basket-a-label">Сладкое</div>
+    </div>
+    <div class="sort-basket drop-zone" id="sort-basket-b" style="flex:1;background:rgba(76,175,80,0.1);" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToBasket(event,'b')">
+      <div style="font-size:40px;" id="sort-basket-b-icon">🐾</div>
+      <div style="font-size:12px;font-weight:700;color:#888;text-align:center;" id="sort-basket-b-label">Животные</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;font-size:14px;color:#888;margin-top:4px;">
+    <span id="sort-progress">Осталось: 8</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: CHEST ══════════════════════════════════ -->
+<div class="screen" id="screen-chest">
+  <div class="stars-bg" id="stars-bg"></div>
+  <div class="top-bar" style="position:relative;z-index:2;">
+    <button class="back-btn" onclick="showScreen('map')" style="background:rgba(255,255,255,0.15);color:white;">←</button>
+    <span style="color:white;font-size:18px;font-weight:800;" id="chest-title-txt">Сундук дня</span>
+    <div class="coins-display">🪙 <span id="chest-coins">0</span></div>
+  </div>
+  <div class="chest-wrap" style="position:relative;z-index:2;">
+    <div id="chest-emoji" class="chest-emoji" onclick="openChest()">🎁</div>
+    <p class="chest-tap-hint" id="chest-hint">Нажми, чтобы открыть!</p>
+    <div id="chest-reward" style="display:none;text-align:center;">
+      <div style="font-size:60px;margin:10px 0;" id="chest-reward-emoji">🪙</div>
+      <div style="font-size:36px;font-weight:900;color:#FFD23F;margin:8px 0;" id="chest-reward-amount">+30 🪙</div>
+      <p style="color:rgba(255,255,255,0.8);font-size:15px;" id="chest-reward-msg">Открывай каждый день!</p>
+      <button class="btn" onclick="showScreen('map')" style="margin-top:20px;" id="chest-continue-btn">На карту →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: QR SCANNER ══════════════════════════════════ -->
+<div class="screen" id="screen-qr">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('map')">←</button>
+    <span style="font-size:18px;font-weight:800;" id="qr-title-txt">Сканируй упаковку</span>
+    <div class="coins-display">🪙 <span id="qr-coins">0</span></div>
+  </div>
+
+  <div style="text-align:center;max-width:400px;width:100%;">
+    <div style="font-size:40px;margin:8px 0;">📦</div>
+    <h2 id="qr-h2" style="margin-bottom:6px;">Найди QR-код на упаковке</h2>
+    <p id="qr-p" style="font-size:14px;margin-bottom:16px;">Наведи камеру на QR-код — и открой новый уровень!</p>
+
+    <div class="qr-viewfinder" id="qr-viewfinder" onclick="simulateScan()">
+      <div class="qr-corner tl"></div>
+      <div class="qr-corner tr"></div>
+      <div class="qr-corner bl"></div>
+      <div class="qr-corner br"></div>
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:0.3;">📱</div>
+    </div>
+
+    <div class="qr-success-badge" id="qr-success">
+      ✅ Упаковка «Бота Ассорти» найдена!<br>+25 🪙 зачислено!
+    </div>
+
+    <button class="btn" onclick="simulateScan()" style="margin-top:12px;" id="qr-demo-btn">
+      🎬 Симулировать сканирование
+    </button>
+
+    <div class="card" style="margin-top:16px;text-align:left;">
+      <h3 style="margin-bottom:10px;">📋 Линейки с QR-кодами:</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+          <span style="font-size:28px;">🍬</span>
+          <div><strong id="qr-prod1">Бота Карамель</strong><br><small style="color:#888;" id="qr-prod1s">+15 🪙 • Открывает Алматы</small></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+          <span style="font-size:28px;">🍫</span>
+          <div><strong id="qr-prod2">Бота Шоколад</strong><br><small style="color:#888;" id="qr-prod2s">+25 🪙 • Открывает Астану</small></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+          <span style="font-size:28px;">🍭</span>
+          <div><strong id="qr-prod3">Бота Ассорти</strong><br><small style="color:#888;" id="qr-prod3s">+40 🪙 • Открывает Туркестан</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCREEN: PROMO CODE ══════════════════════════════════ -->
+<div class="screen" id="screen-promo">
+  <div class="top-bar" style="max-width:480px;">
+    <button class="back-btn" onclick="showScreen('shop')">←</button>
+    <span style="font-size:18px;font-weight:800;" id="promo-title-txt">Ваш промокод</span>
+    <div class="coins-display">🪙 <span id="promo-coins">0</span></div>
+  </div>
+
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <div class="kambot" style="width:100px;height:100px;margin:0;">
+      <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="70" cy="95" rx="42" ry="36" fill="#C8956C"/>
+        <rect x="58" y="60" width="24" height="28" rx="12" fill="#C8956C"/>
+        <ellipse cx="70" cy="52" rx="30" ry="28" fill="#E5B88A"/>
+        <ellipse cx="44" cy="36" rx="8" ry="12" fill="#E5B88A"/><ellipse cx="44" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+        <ellipse cx="96" cy="36" rx="8" ry="12" fill="#E5B88A"/><ellipse cx="96" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+        <ellipse cx="70" cy="70" rx="18" ry="14" fill="#A0714F"/>
+        <ellipse cx="58" cy="48" rx="7" ry="8" fill="white"/><ellipse cx="82" cy="48" rx="7" ry="8" fill="white"/>
+        <circle cx="60" cy="49" r="5" fill="#2D1B00"/><circle cx="84" cy="49" r="5" fill="#2D1B00"/>
+        <circle cx="62" cy="47" r="2" fill="white"/><circle cx="86" cy="47" r="2" fill="white"/>
+        <path d="M60 64 Q70 72 80 64" stroke="#A0714F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="70" cy="60" rx="6" ry="4" fill="#A0714F"/>
+        <path d="M40 88 Q70 102 100 88" stroke="#FF6B35" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <text x="88" y="108" font-size="16">🎉</text>
+      </svg>
+    </div>
+
+    <p style="text-align:center;font-size:16px;font-weight:600;" id="promo-congrats">Поздравляю! Покажи этот экран на кассе:</p>
+
+    <div class="promo-card">
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:4px;" id="promo-label-discount">Ваша скидка:</div>
+      <div class="promo-discount" id="promo-discount-val">5%</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:8px;" id="promo-label-code">Промокод:</div>
+      <div class="promo-code-text" id="promo-code-val">BOTA-2026</div>
+      <div class="promo-qr-icon">▉▌▊▋▌▊▋</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;" id="promo-valid">Действителен до: 31.12.2026</div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <p style="font-size:14px;margin-bottom:8px;" id="promo-howto">Как использовать:</p>
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">1️⃣</span><span id="promo-step1" style="font-size:14px;">Придите в магазин с продукцией «Баян Сулу»</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">2️⃣</span><span id="promo-step2" style="font-size:14px;">Покажите этот экран кассиру</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">3️⃣</span><span id="promo-step3" style="font-size:14px;">Получите скидку на любой товар «Бота»!</span></div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="sharePromo()" style="max-width:380px;">📤 Поделиться с мамой</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ LEVEL UP OVERLAY ══════════════════════════════════ -->
+<div id="levelup-overlay">
+  <div class="levelup-card">
+    <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+    <div style="font-size:22px;font-weight:800;color:white;margin-bottom:4px;" id="levelup-title">Новый уровень!</div>
+    <div class="levelup-num" id="levelup-num">2</div>
+    <p style="color:rgba(255,255,255,0.85);margin:8px 0;" id="levelup-sub">Ты становишься лучше!</p>
+    <button class="btn" style="background:white;color:var(--orange);margin-top:16px;" onclick="closeLevelUp()">Ура! 🎉</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ KAMBOT POPUP ══════════════════════════════════ -->
+<div id="kambot-popup">
+  <div class="kb-avatar">
+    <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="70" cy="95" rx="42" ry="36" fill="#C8956C"/>
+      <rect x="58" y="60" width="24" height="28" rx="12" fill="#C8956C"/>
+      <ellipse cx="70" cy="52" rx="30" ry="28" fill="#E5B88A"/>
+      <ellipse cx="44" cy="36" rx="8" ry="12" fill="#E5B88A"/><ellipse cx="44" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+      <ellipse cx="96" cy="36" rx="8" ry="12" fill="#E5B88A"/><ellipse cx="96" cy="36" rx="5" ry="8" fill="#FFB5A0"/>
+      <ellipse cx="70" cy="70" rx="18" ry="14" fill="#A0714F"/>
+      <ellipse cx="58" cy="48" rx="7" ry="8" fill="white"/><ellipse cx="82" cy="48" rx="7" ry="8" fill="white"/>
+      <circle cx="60" cy="49" r="5" fill="#2D1B00"/><circle cx="84" cy="49" r="5" fill="#2D1B00"/>
+      <circle cx="62" cy="47" r="2" fill="white"/><circle cx="86" cy="47" r="2" fill="white"/>
+      <path d="M60 64 Q70 72 80 64" stroke="#A0714F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="70" cy="60" rx="6" ry="4" fill="#A0714F"/>
+      <path d="M40 88 Q70 102 100 88" stroke="#FF6B35" stroke-width="8" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="kb-bubble" id="kb-bubble-text">Молодец! 🎉</div>
+</div>
+
+<!-- ══════════════════════════════════ CONFETTI CANVAS ══════════════════════════════════ -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════ JAVASCRIPT ══════════════════════════════════ -->
+<script>
+// ─── STATE ───
+const state = {
+  lang: 'ru',
+  playerName: '',
+  playerAge: 0,
+  coins: 0,
+  gamesPlayed: 0,
+  dailyClaimed: false,
+  minutesPlayed: 0,
+  wordsLearned: 0,
+  factsLearned: 0,
+  mathSolved: 0,
+  currentLocation: 'almaty',
+  screenTimer: 30,
+  badges: { first: true, memory: false, words: false, math: false, explorer: false, champion: false }
+};
+
+// Load from localStorage
+function loadState() {
+  const saved = localStorage.getItem('bayan-sulu-state');
+  if (saved) {
+    const s = JSON.parse(saved);
+    Object.assign(state, s);
+    // reset daily if new day
+    const today = new Date().toDateString();
+    if (s.lastLoginDate !== today) { state.dailyClaimed = false; state.chestClaimedToday = false; }
+  }
+}
+
+function saveState() {
+  state.lastLoginDate = new Date().toDateString();
+  localStorage.setItem('bayan-sulu-state', JSON.stringify(state));
+}
+
+// ─── TRANSLATIONS ───
+const T = {
+  ru: {
+    bubble: 'Привет! Я КамБот! Давай отправимся в путешествие по Казахстану! 🇰🇿',
+    nameLabel: 'Как тебя зовут?',
+    ageLabel: 'Сколько тебе лет?',
+    mapGreeting: (n) => `Привет, ${n}! Выбери локацию:`,
+    dailyTitle: 'Ежедневный подарок!',
+    dailySub: 'Нажми, чтобы получить +10 Ботакоинов',
+    dailyClaimed: 'Уже получено сегодня ✓',
+    locAlmatyTitle: 'Алматы — Горы',
+    locAlmatySub: '3 игры • Открыто',
+    locAstanaTitle: 'Астана — Байтерек',
+    locAstanaSub: '3 игры • Открыто',
+    locTurkestanTitle: 'Туркестан — Мавзолей',
+    locTurkestanSub: 'Нужно 50 Ботакоинов',
+    locCharynTitle: 'Чарын — Каньон',
+    locCharynSub: 'Нужно 100 Ботакоинов',
+    open: 'Открыто',
+    factLabel: 'Факт о Казахстане:',
+    game1Title: 'Найди пару!',
+    game1Sub: 'Игра на память с конфетами Баян Сулу',
+    game2Title: 'Казахские слова',
+    game2Sub: 'Угадай слово по картинке',
+    game3Title: 'Считай с Ботой!',
+    game3Sub: 'Считай конфеты вместе с КамБотом',
+    pairsText: 'пар',
+    hint: 'Нажимай на карточки, чтобы открыть их',
+    wordsInstruction: 'Выбери правильный перевод!',
+    countQuestion: 'Сколько конфет?',
+    rewardsTitle: 'Мои награды',
+    myCoinsLabel: 'Мои Ботакоины:',
+    badgesTitle: 'Мои значки:',
+    activityTitle: 'Последние награды:',
+    shopTitle: 'Магазин призов',
+    parentTitle: 'Режим родителя',
+    pinLabel: 'Введите PIN-код',
+    timerTitle: '⏱️ Лимит экранного времени',
+    timerNote: 'Ребёнок получит предупреждение за 5 минут до лимита.',
+    navMap: 'Карта', navRewards: 'Награды', navShop: 'Магазин', navParent: 'Родители',
+    gameMemTitle: 'Найди пару!', gameWordsTitle: 'Казахские слова', gameCountTitle: 'Считай с Ботой!',
+    coinsValueHint: (n) => `= ~${n} тенге скидки`,
+    lockedMsg: 'Зарабатывай Ботакоины, чтобы открыть эту локацию!',
+    wellDone: 'Молодец!', greatJob: 'Отлично!', perfect: 'Супер!',
+    youEarned: 'Ты заработал:', continueBtn: 'Продолжить 🚀',
+    question: (n, total) => `Вопрос ${n} из ${total}`,
+    task: (n, total) => `Задача ${n} из ${total}`,
+    childProgress: '📊 Прогресс ребёнка',
+    eduTitle: '📚 Образовательный прогресс',
+    slName: 'Имя', slAge: 'Возраст', slCoins: 'Ботакоины',
+    slGames: 'Игр пройдено', slToday: 'Сегодня в приложении',
+    edu1: 'Казахских слов изучено', edu2: 'Фактов о Казахстане', edu3: 'Счёт: задач решено',
+    lockParent: '🔒 Выйти из режима родителя',
+    shopDisclaimer: '* Промокоды применяются при покупке в магазинах-партнёрах. Скидка рассчитывается на кассе по QR-коду.',
+    shop1: 'Скидка 5%', shop1s: 'На любую покупку Баян Сулу',
+    shop2: 'Пакет «Ассорти»', shop2s: 'Бесплатная упаковка конфет',
+    shop3: 'Подарочный набор', shop3s: 'Коробка конфет + игрушка КамБот',
+    shop4: 'Новые уровни', shop4s: 'Открыть Туркестан и Чарын',
+    notEnough: 'Не хватает монет!', redeemed: 'Получено!', redeemedMsg: 'Промокод: BOTA',
+    b1: 'Первый шаг', b2: 'Память', b3: 'Казахский', b4: 'Математик', b5: 'Путешественник', b6: 'Чемпион',
+    act1: 'Игра «Найди пару»', act2: 'Ежедневный вход', act3: 'Казахские слова',
+    lvlCurrent: (n) => `Уровень ${n}`, lvlNext: 'до след. уровня',
+    pinHint: 'Подсказка: 1234',
+    mins: 'мин',
+  },
+  kz: {
+    bubble: 'Сәлем! Мен КамБот! Қазақстан бойынша саяхатқа шығайық! 🇰🇿',
+    nameLabel: 'Атың кім?',
+    ageLabel: 'Жасың нешеде?',
+    mapGreeting: (n) => `Сәлем, ${n}! Орынды таңда:`,
+    dailyTitle: 'Күнделікті сыйлық!',
+    dailySub: '+10 Ботакоин алу үшін басыңыз',
+    dailyClaimed: 'Бүгін алынды ✓',
+    locAlmatyTitle: 'Алматы — Таулар',
+    locAlmatySub: '3 ойын • Ашық',
+    locAstanaTitle: 'Астана — Бәйтерек',
+    locAstanaSub: '3 ойын • Ашық',
+    locTurkestanTitle: 'Түркістан — Кесене',
+    locTurkestanSub: '50 Ботакоин қажет',
+    locCharynTitle: 'Шарын — Шатқал',
+    locCharynSub: '100 Ботакоин қажет',
+    open: 'Ашық',
+    factLabel: 'Қазақстан туралы дерек:',
+    game1Title: 'Жұпты тап!',
+    game1Sub: 'Баян Сұлу кәмпитімен жад ойыны',
+    game2Title: 'Қазақ сөздері',
+    game2Sub: 'Суреттен сөзді тап',
+    game3Title: 'Ботамен сана!',
+    game3Sub: 'КамБотпен кәмпитті сана',
+    pairsText: 'жұп',
+    hint: 'Карталарды ашу үшін басыңыз',
+    wordsInstruction: 'Дұрыс аударманы таңда!',
+    countQuestion: 'Неше кәмпит бар?',
+    rewardsTitle: 'Менің марапаттарым',
+    myCoinsLabel: 'Менің Ботакоиндарым:',
+    badgesTitle: 'Менің белгілерім:',
+    activityTitle: 'Соңғы марапаттар:',
+    shopTitle: 'Сыйлықтар дүкені',
+    parentTitle: 'Ата-ана режимі',
+    pinLabel: 'PIN-кодты енгізіңіз',
+    timerTitle: '⏱️ Экран уақыты шегі',
+    timerNote: 'Бала шектен 5 минут бұрын ескертпе алады.',
+    navMap: 'Карта', navRewards: 'Марапат', navShop: 'Дүкен', navParent: 'Ата-ана',
+    gameMemTitle: 'Жұпты тап!', gameWordsTitle: 'Қазақ сөздері', gameCountTitle: 'Ботамен сана!',
+    coinsValueHint: (n) => `= ~${n} теңге жеңілдік`,
+    lockedMsg: 'Осы жерді ашу үшін Ботакоин жина!',
+    wellDone: 'Жарайсың!', greatJob: 'Тамаша!', perfect: 'Керемет!',
+    youEarned: 'Сен алдың:', continueBtn: 'Жалғастыру 🚀',
+    question: (n, total) => `${n}/${total} сұрақ`,
+    task: (n, total) => `${n}/${total} есеп`,
+    childProgress: '📊 Баланың үлгерімі',
+    eduTitle: '📚 Білім үлгерімі',
+    slName: 'Аты', slAge: 'Жасы', slCoins: 'Ботакоиндар',
+    slGames: 'Ойын саны', slToday: 'Бүгін қолданбада',
+    edu1: 'Қазақ сөздері үйренді', edu2: 'Қазақстан дерегі', edu3: 'Математика: есеп',
+    lockParent: '🔒 Ата-ана режимінен шығу',
+    shopDisclaimer: '* Промокодтар серіктес дүкендерде қолданылады.',
+    shop1: '5% жеңілдік', shop1s: 'Кез келген Баян Сұлу сатып алуда',
+    shop2: '«Ассорти» жинағы', shop2s: 'Тегін кәмпит орамы',
+    shop3: 'Сыйлық жинағы', shop3s: 'Кәмпит қорабы + КамБот ойыншығы',
+    shop4: 'Жаңа деңгейлер', shop4s: 'Түркістан мен Шарынды аш',
+    notEnough: 'Жеткілікті тиын жоқ!', redeemed: 'Алынды!', redeemedMsg: 'Промокод: BOTA',
+    b1: 'Алғашқы қадам', b2: 'Жад', b3: 'Қазақша', b4: 'Математик', b5: 'Саяхатшы', b6: 'Чемпион',
+    act1: '«Жұпты тап» ойыны', act2: 'Күнделікті кіру', act3: 'Қазақ сөздері',
+    lvlCurrent: (n) => `${n}-деңгей`, lvlNext: 'келесі деңгейге дейін',
+    pinHint: 'Кеңес: 1234',
+    mins: 'мин',
+  }
+};
+
+function t(key, ...args) {
+  const val = T[state.lang][key];
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+// ─── LANGUAGE ───
+function toggleLang() {
+  state.lang = state.lang === 'ru' ? 'kz' : 'ru';
+  document.getElementById('lang-toggle').textContent = state.lang === 'ru' ? 'KZ' : 'RU';
+  applyTranslations();
+  saveState();
+}
+
+function applyTranslations() {
+  const lang = state.lang;
+  document.getElementById('bubble-text').textContent = t('bubble');
+  document.getElementById('onb-name-label').textContent = t('nameLabel');
+  document.getElementById('onb-age-label').textContent = t('ageLabel');
+  document.getElementById('map-greeting').textContent = t('mapGreeting', state.playerName || 'Игрок');
+  document.getElementById('daily-title').textContent = t('dailyTitle');
+  document.getElementById('daily-sub').textContent = state.dailyClaimed ? t('dailyClaimed') : t('dailySub');
+  document.getElementById('loc-almaty-title').textContent = t('locAlmatyTitle');
+  document.getElementById('loc-almaty-sub').textContent = t('locAlmatySub');
+  document.getElementById('loc-almaty-badge').textContent = t('open');
+  document.getElementById('loc-astana-title').textContent = t('locAstanaTitle');
+  document.getElementById('loc-astana-sub').textContent = t('locAstanaSub');
+  document.getElementById('loc-astana-badge').textContent = t('open');
+  document.getElementById('loc-turkestan-title').textContent = t('locTurkestanTitle');
+  document.getElementById('loc-turkestan-sub').textContent = t('locTurkestanSub');
+  document.getElementById('loc-charyn-title').textContent = t('locCharynTitle');
+  document.getElementById('loc-charyn-sub').textContent = t('locCharynSub');
+  document.getElementById('fact-label').textContent = t('factLabel');
+  document.getElementById('game1-title').textContent = t('game1Title');
+  document.getElementById('game1-sub').textContent = t('game1Sub');
+  document.getElementById('game2-title').textContent = t('game2Title');
+  document.getElementById('game2-sub').textContent = t('game2Sub');
+  document.getElementById('game3-title').textContent = t('game3Title');
+  document.getElementById('game3-sub').textContent = t('game3Sub');
+  document.getElementById('mem-hint').textContent = t('hint');
+  document.getElementById('words-instruction').textContent = t('wordsInstruction');
+  document.getElementById('mem-game-title').textContent = t('gameMemTitle');
+  document.getElementById('words-game-title').textContent = t('gameWordsTitle');
+  document.getElementById('count-game-title').textContent = t('gameCountTitle');
+  document.getElementById('rewards-title').textContent = t('rewardsTitle');
+  document.getElementById('my-coins-label').textContent = t('myCoinsLabel');
+  document.getElementById('badges-title').textContent = t('badgesTitle');
+  document.getElementById('activity-title').textContent = t('activityTitle');
+  document.getElementById('shop-title').textContent = t('shopTitle');
+  document.getElementById('parent-title').textContent = t('parentTitle');
+  document.getElementById('pin-label').textContent = t('pinLabel');
+  document.getElementById('timer-title').textContent = t('timerTitle');
+  document.getElementById('timer-note').textContent = t('timerNote');
+  document.getElementById('child-progress-title').textContent = t('childProgress');
+  document.getElementById('edu-title').textContent = t('eduTitle');
+  document.getElementById('sl-name').textContent = t('slName');
+  document.getElementById('sl-age').textContent = t('slAge');
+  document.getElementById('sl-coins').textContent = t('slCoins');
+  document.getElementById('sl-games').textContent = t('slGames');
+  document.getElementById('sl-today').textContent = t('slToday');
+  document.getElementById('edu1-label').textContent = t('edu1');
+  document.getElementById('edu2-label').textContent = t('edu2');
+  document.getElementById('edu3-label').textContent = t('edu3');
+  document.getElementById('shop-disclaimer').textContent = t('shopDisclaimer');
+  document.getElementById('shop1-title').textContent = t('shop1');
+  document.getElementById('shop1-sub').textContent = t('shop1s');
+  document.getElementById('shop2-title').textContent = t('shop2');
+  document.getElementById('shop2-sub').textContent = t('shop2s');
+  document.getElementById('shop3-title').textContent = t('shop3');
+  document.getElementById('shop3-sub').textContent = t('shop3s');
+  document.getElementById('shop4-title').textContent = t('shop4');
+  document.getElementById('shop4-sub').textContent = t('shop4s');
+  document.getElementById('b1-name').textContent = t('b1');
+  document.getElementById('b2-name').textContent = t('b2');
+  document.getElementById('b3-name').textContent = t('b3');
+  document.getElementById('b4-name').textContent = t('b4');
+  document.getElementById('b5-name').textContent = t('b5');
+  document.getElementById('b6-name').textContent = t('b6');
+  document.getElementById('act1').textContent = t('act1');
+  document.getElementById('act2').textContent = t('act2');
+  document.getElementById('act3').textContent = t('act3');
+  document.getElementById('pin-hint-text').textContent = t('pinHint');
+  ['map','rewards','shop','parent'].forEach((s,i) => {
+    ['nav-map','nav-rewards','nav-shop','nav-parent'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = t('nav' + id.replace('nav-','').replace(/^\w/,c=>c.toUpperCase()));
+    });
+  });
+  // all nav elements
+  for (let suffix of ['','2','3','4']) {
+    const el = id => document.getElementById(id + suffix);
+    if (el('nav-map')) el('nav-map').textContent = t('navMap');
+    if (el('nav-rewards')) el('nav-rewards').textContent = t('navRewards');
+    if (el('nav-shop')) el('nav-shop').textContent = t('navShop');
+    if (el('nav-parent')) el('nav-parent').textContent = t('navParent');
+  }
+  updateCoinsDisplay();
+  updateRewardsScreen();
+  updateParentStats();
+}
+
+// ─── SCREENS ───
+const MAIN_SCREENS = ['map','rewards','shop','parent'];
+let prevScreen = null;
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const next = document.getElementById('screen-' + name);
+  if (!next) { console.warn('Screen not found: screen-' + name); return; }
+  next.classList.add('active', 'slide-in');
+  setTimeout(() => next.classList.remove('slide-in'), 300);
+  prevScreen = name;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (MAIN_SCREENS.includes(name)) {
+    const idx = MAIN_SCREENS.indexOf(name);
+    document.querySelectorAll('.nav-item').forEach((b, i) => {
+      if (i % 4 === idx) b.classList.add('active');
+    });
+  }
+  // scroll to top
+  next.scrollTop = 0;
+  if (name === 'rewards') updateRewardsScreen();
+  if (name === 'shop') { updateCoinsDisplay(); document.getElementById('qr-scanned') && (qrScanned=false); }
+  if (name === 'parent') { lockParent(); updateParentStats(); }
+  if (name === 'map') { updateCoinsDisplay(); updateDailyCard(); }
+  if (name === 'qr') { qrScanned=false; document.getElementById('qr-success').style.display='none'; document.getElementById('qr-demo-btn').style.display='block'; document.getElementById('qr-viewfinder').style.borderColor='var(--orange)'; document.getElementById('qr-viewfinder').innerHTML=`<div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div><div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:0.3;">📱</div>`; document.getElementById('qr-coins').textContent=state.coins; }
+  if (name === 'promo') { document.getElementById('promo-coins').textContent=state.coins; }
+}
+
+// ─── ONBOARDING ───
+let selectedAge = 0;
+
+function goToAgeSelect() {
+  const name = document.getElementById('player-name-input').value.trim();
+  if (!name) { showToast('Введи своё имя!'); return; }
+  state.playerName = name;
+  document.getElementById('onb-step1').style.display = 'none';
+  document.getElementById('onb-step2').style.display = 'block';
+  document.getElementById('bubble-text').textContent = `Отлично, ${name}! 😊`;
+  if (state.lang === 'kz') document.getElementById('bubble-text').textContent = `Тамаша, ${name}! 😊`;
+}
+
+function selectAge(age) {
+  selectedAge = age;
+  document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+  event.target.classList.add('selected');
+  document.getElementById('age-confirm-btn').style.display = 'block';
+}
+
+function finishOnboarding() {
+  if (!selectedAge) return;
+  state.playerAge = selectedAge;
+  state.badges.first = true;
+  saveState();
+  showScreen('map');
+  document.getElementById('map-greeting').textContent = t('mapGreeting', state.playerName);
+  updateCoinsDisplay();
+  // Show welcome toast
+  setTimeout(() => showToast(state.lang === 'ru' ? `Добро пожаловать, ${state.playerName}! 🎉` : `Қош келдің, ${state.playerName}! 🎉`), 500);
+}
+
+// ─── MAP ───
+const locationData = {
+  almaty: {
+    icon: '⛰️',
+    title: { ru: 'Алматы — Горы', kz: 'Алматы — Таулар' },
+    fact: { ru: 'Алматы — самый большой город Казахстана, у подножия гор Тянь-Шань. Высота гор — до 5000 метров! 🏔️', kz: 'Алматы — Қазақстанның ең үлкен қаласы, Тянь-Шань тауларының етегінде. Таулардың биіктігі — 5000 метрге дейін! 🏔️' }
+  },
+  astana: {
+    icon: '🗼',
+    title: { ru: 'Астана — Байтерек', kz: 'Астана — Бәйтерек' },
+    fact: { ru: 'Байтерек — символ Астаны. Его высота 97 метров, что означает год переноса столицы — 1997! 🗼', kz: 'Бәйтерек — Астананың символы. Биіктігі 97 метр, бұл астана ауысқан жыл — 1997! 🗼' }
+  }
+};
+
+function openLocation(loc) {
+  state.currentLocation = loc;
+  const data = locationData[loc];
+  document.getElementById('loc-header-icon').textContent = data.icon;
+  document.getElementById('loc-header-title').textContent = data.title[state.lang];
+  document.getElementById('location-fact').textContent = data.fact[state.lang];
+  document.getElementById('loc-header-sub').textContent = state.lang === 'ru' ? 'Познакомься с природой Казахстана!' : 'Қазақстан табиғатымен танысыңыз!';
+  document.getElementById('loc-coins').textContent = state.coins;
+  state.factsLearned = Math.min(state.factsLearned + 1, 20);
+  showScreen('location');
+}
+
+function showLockedMsg() {
+  showToast(t('lockedMsg'));
+}
+
+function updateDailyCard() {
+  const card = document.getElementById('daily-reward-card');
+  if (state.dailyClaimed) {
+    document.getElementById('daily-sub').textContent = t('dailyClaimed');
+    card.style.opacity = '0.7';
+    card.style.cursor = 'default';
+  } else {
+    document.getElementById('daily-sub').textContent = t('dailySub');
+    card.style.opacity = '1';
+    card.style.cursor = 'pointer';
+  }
+}
+
+function claimDaily() {
+  if (state.dailyClaimed) { showToast(t('dailyClaimed')); return; }
+  state.dailyClaimed = true;
+  addCoins(10);
+  updateDailyCard();
+  saveState();
+  showResult('🎁', state.lang === 'ru' ? 'Ежедневный подарок!' : 'Күнделікті сыйлық!', 10, state.lang === 'ru' ? 'Возвращайся завтра за новым подарком!' : 'Жаңа сыйлыққа ертең қайта кел!');
+}
+
+// ─── COINS ───
+function addCoins(amount) {
+  state.coins += amount;
+  updateCoinsDisplay();
+  saveState();
+  // burst from coins display if visible
+  const coinsEl = document.querySelector('.coins-display');
+  if (coinsEl && amount > 0) {
+    const r = coinsEl.getBoundingClientRect();
+    if (typeof burstCoins === 'function') burstCoins(r.left + r.width/2, r.top + r.height/2, Math.min(amount, 6));
+  }
+  if (typeof checkLevelUp === 'function') checkLevelUp();
+}
+
+function updateCoinsDisplay() {
+  ['map-coins','loc-coins','mem-coins','words-coins','count-coins','rew-coins','shop-coins','par-coins','big-coins'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = state.coins;
+  });
+  // coins value hint
+  const hintEl = document.getElementById('coins-value-hint');
+  if (hintEl) hintEl.textContent = t('coinsValueHint', state.coins * 5);
+}
+
+// ─── GAME: MEMORY ───
+const candyEmojis = ['🍬', '🍭', '🍫', '🍩', '🧁', '🍰', '🎂', '🍦'];
+let memCards = [], memFlipped = [], memMatched = 0, memTimer = null, memLocked = false;
+
+function startGame(type) {
+  if (type === 'memory') startMemoryGame();
+  else if (type === 'words') startWordsGame();
+  else if (type === 'count') startCountGame();
+}
+
+function startMemoryGame() {
+  memMatched = 0;
+  memFlipped = [];
+  memLocked = false;
+  document.getElementById('mem-coins').textContent = state.coins;
+  document.getElementById('mem-pairs').textContent = `0/8`;
+  document.getElementById('mem-timer').textContent = '60';
+  document.getElementById('mem-timer-bar').style.width = '100%';
+
+  const pairs = [...candyEmojis, ...candyEmojis];
+  shuffle(pairs);
+  memCards = pairs;
+
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  pairs.forEach((emoji, i) => {
+    const card = document.createElement('div');
+    card.className = 'memory-card';
+    card.dataset.index = i;
+    card.dataset.emoji = emoji;
+    card.innerHTML = `
+      <div class="card-face card-front">B</div>
+      <div class="card-face card-back" id="mback-${i}">${emoji}</div>
+    `;
+    card.onclick = () => flipCard(card, i);
+    grid.appendChild(card);
+  });
+
+  showScreen('game-memory');
+  startMemTimer(60);
+}
+
+function flipCard(card, idx) {
+  if (memLocked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  card.classList.add('flipped');
+  memFlipped.push({ card, idx, emoji: card.dataset.emoji });
+
+  if (memFlipped.length === 2) {
+    memLocked = true;
+    setTimeout(checkMemMatch, 700);
+  }
+}
+
+function checkMemMatch() {
+  const [a, b] = memFlipped;
+  if (a.emoji === b.emoji) {
+    a.card.classList.add('matched');
+    b.card.classList.add('matched');
+    document.getElementById(`mback-${a.idx}`).classList.add('matched-bg');
+    document.getElementById(`mback-${b.idx}`).classList.add('matched-bg');
+    memMatched++;
+    document.getElementById('mem-pairs').textContent = `${memMatched}/8`;
+    if (memMatched === 8) {
+      clearInterval(memTimer);
+      setTimeout(() => finishMemoryGame(), 500);
+    }
+  } else {
+    a.card.classList.remove('flipped');
+    b.card.classList.remove('flipped');
+  }
+  memFlipped = [];
+  memLocked = false;
+}
+
+function startMemTimer(seconds) {
+  clearInterval(memTimer);
+  let s = seconds;
+  memTimer = setInterval(() => {
+    s--;
+    document.getElementById('mem-timer').textContent = s;
+    document.getElementById('mem-timer-bar').style.width = (s / seconds * 100) + '%';
+    if (s <= 0) {
+      clearInterval(memTimer);
+      finishMemoryGame(true);
+    }
+  }, 1000);
+}
+
+function finishMemoryGame(timeout = false) {
+  const earned = timeout ? Math.max(5, memMatched * 2) : 15;
+  state.gamesPlayed++;
+  state.badges.memory = true;
+  addCoins(earned);
+  checkBadges();
+  showResult(timeout ? '⏱️' : '🎉', timeout ? (state.lang === 'ru' ? 'Время вышло!' : 'Уақыт бітті!') : t('greatJob'), earned,
+    state.lang === 'ru' ? `Ты нашёл ${memMatched} из 8 пар!` : `Сен ${memMatched}/8 жұп таптың!`);
+}
+
+// ─── GAME: KAZAKH WORDS ───
+const wordData = [
+  { word: 'АПТА', emoji: '📅', meaning: 'неделя', options: ['📅', '🌙', '🌞', '⭐'] },
+  { word: 'АТ', emoji: '🐴', meaning: 'лошадь', options: ['🐴', '🐪', '🐑', '🦅'] },
+  { word: 'КӨЗ', emoji: '👁️', meaning: 'глаз', options: ['👁️', '👂', '👃', '👄'] },
+  { word: 'СУ', emoji: '💧', meaning: 'вода', options: ['💧', '🔥', '💨', '🌍'] },
+  { word: 'АЙ', emoji: '🌙', meaning: 'луна/месяц', options: ['🌙', '☀️', '⭐', '🌧️'] },
+  { word: 'ТАУ', emoji: '⛰️', meaning: 'гора', options: ['⛰️', '🌊', '🌲', '🌵'] },
+  { word: 'КІТ АП', emoji: '📚', meaning: 'книга', options: ['📚', '✏️', '🎒', '🖊️'] },
+  { word: 'ДОС', emoji: '🤝', meaning: 'друг', options: ['🤝', '❤️', '👋', '🎁'] },
+];
+
+let wIndex = 0, wScore = 0, wData = [];
+
+function startWordsGame() {
+  wIndex = 0;
+  wScore = 0;
+  wData = shuffle([...wordData]);
+  document.getElementById('words-coins').textContent = state.coins;
+  renderScoreBar(8);
+  showScreen('game-words');
+  renderWordQuestion();
+}
+
+function renderScoreBar(total) {
+  const bar = document.getElementById('score-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'score-dot';
+    dot.id = `sdot-${i}`;
+    bar.appendChild(dot);
+  }
+}
+
+function renderWordQuestion() {
+  if (wIndex >= wData.length) { finishWordsGame(); return; }
+  const q = wData[wIndex];
+  document.getElementById('current-word').textContent = q.word;
+  document.getElementById('words-progress').textContent = t('question', wIndex + 1, wData.length);
+  state.wordsLearned = Math.min(state.wordsLearned + 1, 40);
+  const optionsDiv = document.getElementById('word-options');
+  optionsDiv.innerHTML = '';
+  shuffle([...q.options]).forEach(emoji => {
+    const btn = document.createElement('div');
+    btn.className = 'word-option';
+    btn.textContent = emoji;
+    btn.onclick = () => answerWord(btn, emoji === q.emoji, q.emoji, optionsDiv);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function answerWord(btn, correct, correctEmoji, container) {
+  container.querySelectorAll('.word-option').forEach(b => b.onclick = null);
+  if (correct) {
+    btn.classList.add('correct');
+    wScore++;
+    document.getElementById(`sdot-${wIndex}`).classList.add('correct');
+    document.getElementById(`sdot-${wIndex}`).textContent = '✓';
+  } else {
+    btn.classList.add('wrong');
+    container.querySelectorAll('.word-option').forEach(b => { if (b.textContent === correctEmoji) b.classList.add('correct'); });
+    document.getElementById(`sdot-${wIndex}`).classList.add('wrong');
+    document.getElementById(`sdot-${wIndex}`).textContent = '✗';
+  }
+  document.dispatchEvent(new CustomEvent('game-answer', { detail: { correct } }));
+  wIndex++;
+  setTimeout(renderWordQuestion, 900);
+}
+
+function finishWordsGame() {
+  const earned = wScore * 3;
+  state.gamesPlayed++;
+  state.badges.words = wScore >= 5;
+  addCoins(earned);
+  checkBadges();
+  showResult(wScore >= 6 ? '🏆' : '⭐', t('greatJob'), earned,
+    state.lang === 'ru' ? `Правильных ответов: ${wScore} из ${wData.length}` : `Дұрыс жауап: ${wScore}/${wData.length}`);
+}
+
+// ─── GAME: COUNTING ───
+const candyTypes = ['🍬', '🍭', '🍫', '🍩', '🧁'];
+let cIndex = 0, cScore = 0, cTotal = 8;
+
+function startCountGame() {
+  cIndex = 0;
+  cScore = 0;
+  document.getElementById('count-coins').textContent = state.coins;
+  showScreen('game-count');
+  renderCountQuestion();
+}
+
+function renderCountQuestion() {
+  if (cIndex >= cTotal) { finishCountGame(); return; }
+  const count = Math.floor(Math.random() * 10) + 1;
+  const candy = candyTypes[Math.floor(Math.random() * candyTypes.length)];
+  document.getElementById('count-question-text').textContent = t('countQuestion');
+  document.getElementById('count-progress').textContent = t('task', cIndex + 1, cTotal);
+  state.mathSolved++;
+
+  const display = document.getElementById('candies-display');
+  display.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const span = document.createElement('span');
+    span.className = 'candy-emoji';
+    span.textContent = candy;
+    span.style.animationDelay = (i * 0.05) + 's';
+    display.appendChild(span);
+  }
+
+  const wrong1 = count === 1 ? 2 : count - 1;
+  const wrong2 = count === 10 ? 9 : count + 1;
+  const wrong3 = count + 2 > 10 ? count - 2 : count + 2;
+  const options = shuffle([count, wrong1, wrong2, wrong3]);
+  const answersDiv = document.getElementById('count-answers');
+  answersDiv.innerHTML = '';
+  options.forEach(num => {
+    const btn = document.createElement('button');
+    btn.className = 'count-answer';
+    btn.textContent = num;
+    btn.onclick = () => answerCount(btn, num === count, count, answersDiv);
+    answersDiv.appendChild(btn);
+  });
+}
+
+function answerCount(btn, correct, correctVal, container) {
+  container.querySelectorAll('button').forEach(b => b.onclick = null);
+  if (correct) {
+    btn.classList.add('correct');
+    cScore++;
+  } else {
+    btn.classList.add('wrong');
+    container.querySelectorAll('button').forEach(b => { if (parseInt(b.textContent) === correctVal) b.classList.add('correct'); });
+  }
+  document.dispatchEvent(new CustomEvent('game-answer', { detail: { correct } }));
+  cIndex++;
+  setTimeout(renderCountQuestion, 900);
+}
+
+function finishCountGame() {
+  const earned = cScore * 2;
+  state.gamesPlayed++;
+  state.badges.math = cScore >= 6;
+  addCoins(earned);
+  checkBadges();
+  showResult(cScore >= 6 ? '🎉' : '⭐', t('greatJob'), earned,
+    state.lang === 'ru' ? `Верных ответов: ${cScore} из ${cTotal}` : `Дұрыс жауап: ${cScore}/${cTotal}`);
+}
+
+// ─── RESULT ───
+function showResult(emoji, title, coins, subtitle) {
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-subtitle').textContent = t('youEarned');
+  document.getElementById('result-coins').textContent = `+${coins} 🪙`;
+  document.getElementById('result-fact').textContent = subtitle;
+  document.getElementById('result-overlay').classList.add('show');
+  if (coins >= 10 && typeof launchConfetti === 'function') {
+    launchConfetti();
+    setTimeout(() => typeof kambotSay === 'function' && kambotSay('win'), 400);
+  }
+}
+
+function closeResult() {
+  document.getElementById('result-overlay').classList.remove('show');
+}
+
+// ─── REWARDS SCREEN ───
+function updateRewardsScreen() {
+  document.getElementById('big-coins').textContent = state.coins;
+  document.getElementById('rew-coins').textContent = state.coins;
+  const discount = state.coins * 5;
+  document.getElementById('coins-value-hint').textContent = t('coinsValueHint', discount);
+
+  // Level
+  const level = Math.floor(state.coins / 50) + 1;
+  const progress = (state.coins % 50) / 50 * 100;
+  document.getElementById('lvl-current').textContent = t('lvlCurrent', level);
+  document.getElementById('lvl-next').textContent = t('lvlNext');
+  document.getElementById('progress-fill').style.width = progress + '%';
+
+  // Badges
+  ['memory','words','math','explorer','champion'].forEach(b => {
+    const el = document.getElementById('badge-' + b);
+    if (el) {
+      if (state.badges[b]) el.classList.remove('locked');
+      else el.classList.add('locked');
+    }
+  });
+  if (state.badges.first) document.getElementById('badge-first').classList.remove('locked');
+
+  // Parent stats
+  document.getElementById('sv-coins').textContent = state.coins + ' 🪙';
+  document.getElementById('sv-games').textContent = state.gamesPlayed;
+  document.getElementById('sv-today').textContent = state.minutesPlayed + ' ' + t('mins');
+  document.getElementById('edu1-val').textContent = state.wordsLearned + ' / 40';
+  document.getElementById('edu2-val').textContent = state.factsLearned + ' / 20';
+  document.getElementById('edu3-val').textContent = state.mathSolved;
+}
+
+function checkBadges() {
+  if (state.gamesPlayed >= 1) state.badges.first = true;
+  if (state.gamesPlayed >= 5 && state.coins >= 100) state.badges.explorer = true;
+  if (state.badges.memory && state.badges.words && state.badges.math) state.badges.champion = true;
+  saveState();
+}
+
+// ─── SHOP ───
+function redeemItem(btn, cost, id) {
+  if (state.coins < cost) {
+    showToast(t('notEnough'));
+    return;
+  }
+  state.coins -= cost;
+  updateCoinsDisplay();
+  btn.textContent = '✓ ' + t('redeemed');
+  btn.classList.add('redeemed');
+  btn.onclick = null;
+  saveState();
+  showToast(`${t('redeemedMsg')}-${Math.random().toString(36).substr(2,6).toUpperCase()}`);
+}
+
+// ─── PARENT MODE ───
+const PIN = '1234';
+let pinEntry = '';
+
+function pinPress(key) {
+  if (key === 'C') { pinEntry = ''; updatePinDots(); return; }
+  if (key === 'OK') {
+    if (pinEntry === PIN) {
+      document.getElementById('parent-locked').style.display = 'none';
+      document.getElementById('parent-unlocked').style.display = 'block';
+      updateParentStats();
+    } else {
+      showToast(state.lang === 'ru' ? 'Неверный PIN!' : 'PIN қате!');
+      pinEntry = '';
+      updatePinDots();
+    }
+    return;
+  }
+  if (pinEntry.length < 4) {
+    pinEntry += key;
+    updatePinDots();
+    if (pinEntry.length === 4) setTimeout(() => pinPress('OK'), 300);
+  }
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById('pd' + i);
+    if (el) el.classList.toggle('filled', i < pinEntry.length);
+  }
+}
+
+function lockParent() {
+  pinEntry = '';
+  updatePinDots();
+  document.getElementById('parent-locked').style.display = 'block';
+  document.getElementById('parent-unlocked').style.display = 'none';
+}
+
+function updateParentStats() {
+  document.getElementById('sv-name').textContent = state.playerName || '—';
+  document.getElementById('sv-age').textContent = state.playerAge ? state.playerAge + ' ' + (state.lang === 'ru' ? 'лет' : 'жас') : '—';
+  document.getElementById('sv-coins').textContent = state.coins + ' 🪙';
+  document.getElementById('sv-games').textContent = state.gamesPlayed;
+  document.getElementById('sv-today').textContent = state.minutesPlayed + ' ' + t('mins');
+  document.getElementById('edu1-val').textContent = state.wordsLearned + ' / 40';
+  document.getElementById('edu2-val').textContent = state.factsLearned + ' / 20';
+  document.getElementById('edu3-val').textContent = state.mathSolved;
+  document.getElementById('par-coins').textContent = state.coins;
+}
+
+function setTimer(mins, btn) {
+  state.screenTimer = mins;
+  document.querySelectorAll('.timer-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  saveState();
+  showToast((state.lang === 'ru' ? 'Лимит установлен: ' : 'Шек орнатылды: ') + mins + ' ' + t('mins'));
+}
+
+// ─── TOAST ───
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ─── UTILS ───
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ─── SCREEN TIME TRACKER ───
+setInterval(() => {
+  state.minutesPlayed++;
+  if (state.minutesPlayed >= state.screenTimer) {
+    showToast(state.lang === 'ru'
+      ? `⏱️ ${state.playerName}, время отдохнуть! Лимит ${state.screenTimer} мин.`
+      : `⏱️ ${state.playerName}, демалу уақыты! Шек ${state.screenTimer} мин.`);
+  }
+  saveState();
+}, 60000);
+
+// ═══════════════════ CONFETTI ═══════════════════
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRunning = false;
+
+function launchConfetti() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  confettiParticles = [];
+  const colors = ['#FF6B35','#FFD23F','#4CAF50','#9C27B0','#2196F3','#FF5722'];
+  for (let i = 0; i < 120; i++) {
+    confettiParticles.push({
+      x: Math.random() * confettiCanvas.width,
+      y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+      w: 8 + Math.random() * 8,
+      h: 6 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: 3 + Math.random() * 4,
+      vx: (Math.random() - 0.5) * 3,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.15,
+    });
+  }
+  confettiRunning = true;
+  requestAnimationFrame(animateConfetti);
+  setTimeout(() => { confettiRunning = false; confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); }, 3000);
+}
+
+function animateConfetti() {
+  if (!confettiRunning) return;
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles.forEach(p => {
+    p.y += p.vy; p.x += p.vx; p.rot += p.rotSpeed;
+    confettiCtx.save();
+    confettiCtx.translate(p.x, p.y);
+    confettiCtx.rotate(p.rot);
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    confettiCtx.restore();
+  });
+  confettiParticles = confettiParticles.filter(p => p.y < confettiCanvas.height + 20);
+  if (confettiParticles.length > 0) requestAnimationFrame(animateConfetti);
+  else confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+}
+
+// ═══════════════════ COIN BURST ═══════════════════
+function burstCoins(x, y, count = 5) {
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'coin-burst';
+    el.textContent = '🪙';
+    el.style.left = (x + (Math.random()-0.5)*60) + 'px';
+    el.style.top  = (y + (Math.random()-0.5)*40) + 'px';
+    el.style.animationDelay = (i * 0.08) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+}
+
+// ═══════════════════ KAMBOT REACTIONS ═══════════════════
+let kbTimer;
+const KB_PHRASES = {
+  ru: {
+    correct:  ['Правильно! 🌟','Молодец! 💪','Ты умница! 🎉','Вот это да! ⭐','Отлично! 🔥'],
+    wrong:    ['Не беда, попробуй ещё! 😊','Почти! Давай ещё раз 💪','Ничего, учимся! 🌱'],
+    win:      ['Ты чемпион! 🏆','Невероятно! Я горжусь тобой! 🎊','Вот это результат! 🌟'],
+    start:    ['Поехали! Ты справишься! 🚀','Верю в тебя! 💛','Давай покажем, на что мы способны!'],
+    idle:     ['Нажми на любую локацию! 🗺️','Загляни в Сундук дня! 🎁','Сканируй упаковку за монеты! 📦'],
+    daily:    ['Ура, ты пришёл! 🎉','Каждый день — новое открытие! 🌅'],
+  },
+  kz: {
+    correct:  ['Дұрыс! 🌟','Жарайсың! 💪','Сен данасың! 🎉','Керемет! ⭐','Тамаша! 🔥'],
+    wrong:    ['Ештеңе емес, қайталап көр! 😊','Дерлік дұрыс! Тағы бір рет 💪','Бірге үйренеміз! 🌱'],
+    win:      ['Сен чемпионсың! 🏆','Керемет нәтиже! 🎊','Мен сенімен мақтанамын! 🌟'],
+    start:    ['Жүреміз! Сенемін саған! 🚀','Бірге жеңеміз! 💛'],
+    idle:     ['Кез келген орынды таңда! 🗺️','Күнделікті сандықты аш! 🎁'],
+    daily:    ['Ура, келдің! 🎉','Күн сайын жаңа ашылым! 🌅'],
+  }
+};
+
+function kambotSay(category) {
+  const phrases = KB_PHRASES[state.lang][category] || KB_PHRASES[state.lang].idle;
+  const text = phrases[Math.floor(Math.random() * phrases.length)];
+  const popup = document.getElementById('kambot-popup');
+  document.getElementById('kb-bubble-text').textContent = text;
+  popup.classList.add('show');
+  clearTimeout(kbTimer);
+  kbTimer = setTimeout(() => popup.classList.remove('show'), 3200);
+}
+
+// ═══════════════════ CHEST (DAILY SУНДУК) ═══════════════════
+const CHEST_REWARDS = [
+  { emoji:'🪙', amount:30, msg:{ ru:'30 монет зачислено!', kz:'30 тиын есептелді!' } },
+  { emoji:'⭐', amount:50, msg:{ ru:'Суперyday! 50 монет!', kz:'Керемет! 50 тиын!' } },
+  { emoji:'🎊', amount:20, msg:{ ru:'Бонус-день! +20 монет', kz:'Бонус-күн! +20 тиын' } },
+];
+let chestOpened = false;
+
+function goToChest() {
+  if (state.chestClaimedToday) {
+    showToast(state.lang === 'ru' ? 'Сундук уже открыт сегодня! Приходи завтра 🌙' : 'Сандық бүгін ашылды! Ертең кел 🌙');
+    return;
+  }
+  chestOpened = false;
+  document.getElementById('chest-emoji').textContent = '🎁';
+  document.getElementById('chest-emoji').classList.remove('opening');
+  document.getElementById('chest-reward').style.display = 'none';
+  document.getElementById('chest-hint').style.display = 'block';
+  document.getElementById('chest-coins').textContent = state.coins;
+  buildStars();
+  showScreen('chest');
+  setTimeout(() => kambotSay('daily'), 800);
+}
+
+function buildStars() {
+  const bg = document.getElementById('stars-bg');
+  bg.innerHTML = '';
+  const emojis = ['⭐','🌟','✨','💫'];
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.className = 'star-particle';
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = Math.random()*100 + '%';
+    s.style.animationDuration = (6 + Math.random()*8) + 's';
+    s.style.animationDelay = (Math.random()*6) + 's';
+    bg.appendChild(s);
+  }
+}
+
+function openChest() {
+  if (chestOpened) return;
+  chestOpened = true;
+  const reward = CHEST_REWARDS[Math.floor(Math.random() * CHEST_REWARDS.length)];
+  const chestEl = document.getElementById('chest-emoji');
+  chestEl.classList.add('opening');
+  launchConfetti();
+  setTimeout(() => {
+    chestEl.style.display = 'none';
+    document.getElementById('chest-hint').style.display = 'none';
+    const rewardDiv = document.getElementById('chest-reward');
+    document.getElementById('chest-reward-emoji').textContent = reward.emoji;
+    document.getElementById('chest-reward-amount').textContent = `+${reward.amount} 🪙`;
+    document.getElementById('chest-reward-msg').textContent = reward.msg[state.lang];
+    rewardDiv.style.display = 'block';
+    rewardDiv.style.animation = 'popIn 0.5s ease';
+    addCoins(reward.amount);
+    state.chestClaimedToday = true;
+    saveState();
+    burstCoins(window.innerWidth/2, window.innerHeight/2, 8);
+    kambotSay('win');
+  }, 700);
+}
+
+// ═══════════════════ QR SCANNER ═══════════════════
+let qrScanned = false;
+function simulateScan() {
+  if (qrScanned) return;
+  qrScanned = true;
+  const vf = document.getElementById('qr-viewfinder');
+  vf.style.borderColor = '#4CAF50';
+  vf.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:56px;color:#4CAF50;">✅</div>`;
+  setTimeout(() => {
+    const badge = document.getElementById('qr-success');
+    badge.style.display = 'block';
+    document.getElementById('qr-demo-btn').style.display = 'none';
+    addCoins(25);
+    burstCoins(window.innerWidth/2, 300, 6);
+    launchConfetti();
+    kambotSay('win');
+    setTimeout(() => { qrScanned = false; }, 5000);
+  }, 600);
+}
+
+// ═══════════════════ PROMO CODE ═══════════════════
+function redeemAndShowPromo(btn, cost, discount, code) {
+  if (state.coins < cost) {
+    showToast(t('notEnough'));
+    kambotSay('wrong');
+    return;
+  }
+  state.coins -= cost;
+  updateCoinsDisplay();
+  btn.textContent = '✓';
+  btn.classList.add('redeemed');
+  btn.onclick = null;
+  saveState();
+  // Show promo screen
+  document.getElementById('promo-coins').textContent = state.coins;
+  document.getElementById('promo-discount-val').textContent = discount;
+  document.getElementById('promo-code-val').textContent = code + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  showScreen('promo');
+  launchConfetti();
+  setTimeout(() => kambotSay('win'), 600);
+}
+
+function sharePromo() {
+  const code = document.getElementById('promo-code-val').textContent;
+  const msg = state.lang === 'ru'
+    ? `🎉 Мой промокод от Bayan Sulu Kids: ${code}\nСкидка на конфеты «Бота»!`
+    : `🎉 Менің промокодым: ${code}\n«Бота» кәмпиттеріне жеңілдік!`;
+  if (navigator.share) {
+    navigator.share({ title: 'Bayan Sulu Kids', text: msg });
+  } else {
+    navigator.clipboard.writeText(msg).then(() => showToast(state.lang === 'ru' ? 'Скопировано! 📋' : 'Көшірілді! 📋'));
+  }
+}
+
+// ═══════════════════ LEVEL UP ═══════════════════
+let lastLevel = 1;
+function checkLevelUp() {
+  const level = Math.floor(state.coins / 50) + 1;
+  if (level > lastLevel) {
+    lastLevel = level;
+    document.getElementById('levelup-num').textContent = level;
+    document.getElementById('levelup-title').textContent = state.lang === 'ru' ? 'Новый уровень!' : 'Жаңа деңгей!';
+    document.getElementById('levelup-sub').textContent = state.lang === 'ru' ? `Ты на уровне ${level}! Так держать!` : `${level}-деңгейдесің! Жарайсың!`;
+    document.getElementById('levelup-overlay').classList.add('show');
+    launchConfetti();
+  }
+}
+function closeLevelUp() {
+  document.getElementById('levelup-overlay').classList.remove('show');
+}
+
+
+// KamBot hooks injected into existing answer functions via event
+document.addEventListener('game-answer', e => {
+  kambotSay(e.detail.correct ? 'correct' : 'wrong');
+});
+
+// ═══════════════════ IDLE KAMBOT ═══════════════════
+setInterval(() => {
+  const active = document.querySelector('.screen.active');
+  if (active && active.id === 'screen-map') kambotSay('idle');
+}, 20000);
+
+// ═══════════════════ INIT ───
+loadState();
+lastLevel = Math.floor(state.coins / 50) + 1;
+if (state.playerName) {
+  showScreen('map');
+  document.getElementById('map-greeting').textContent = t('mapGreeting', state.playerName);
+  updateCoinsDisplay();
+  updateDailyCard();
+  setTimeout(() => kambotSay('idle'), 1500);
+} else {
+  showScreen('onboarding');
+}
+applyTranslations();
+
+// ════════════════════════════════════════════════════
+//  SMOOTH SCREEN TRANSITIONS (replaces old showScreen)
+// ════════════════════════════════════════════════════
+(function patchShowScreen() {
+  const orig = showScreen;
+  window.showScreen = function(name) {
+    const prev = document.querySelector('.screen.active');
+    if (prev && prev.id !== 'screen-' + name) {
+      prev.classList.add('exiting');
+      setTimeout(() => { prev.classList.remove('active','exiting'); }, 200);
+    } else if (prev) {
+      prev.classList.remove('active');
+    }
+    const next = document.getElementById('screen-' + name);
+    if (!next) { console.warn('screen-' + name + ' not found'); return; }
+    setTimeout(() => {
+      next.classList.add('active','entering');
+      setTimeout(() => next.classList.remove('entering'), 350);
+    }, prev && prev.id !== 'screen-' + name ? 160 : 0);
+    // keep rest of orig logic
+    prevScreen = name;
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    const MAIN = ['map','rewards','shop','parent'];
+    if (MAIN.includes(name)) {
+      const idx = MAIN.indexOf(name);
+      document.querySelectorAll('.nav-item').forEach((b,i) => { if(i%4===idx) b.classList.add('active'); });
+    }
+    if (name==='rewards') updateRewardsScreen();
+    if (name==='shop') updateCoinsDisplay();
+    if (name==='parent') { lockParent(); updateParentStats(); }
+    if (name==='map') { updateCoinsDisplay(); updateDailyCard(); updateQuestMap(); }
+    if (name==='qr') {
+      qrScanned=false;
+      document.getElementById('qr-success').style.display='none';
+      document.getElementById('qr-demo-btn').style.display='block';
+      document.getElementById('qr-viewfinder').style.borderColor='var(--orange)';
+      document.getElementById('qr-viewfinder').innerHTML=`<div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div><div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;opacity:0.3;">📱</div>`;
+      document.getElementById('qr-coins').textContent=state.coins;
+    }
+    if (name==='promo') document.getElementById('promo-coins').textContent=state.coins;
+  };
+})();
+
+// ════════════════════════════════════════════════════
+//  QUEST MAP update
+// ════════════════════════════════════════════════════
+function updateQuestMap() {
+  // Show check on completed locations
+  const almaCheck = document.getElementById('qn-almaty-check');
+  const astaCheck = document.getElementById('qn-astana-check');
+  if (almaCheck && state.gamesPlayed >= 1) almaCheck.style.display='flex';
+  if (astaCheck && state.gamesPlayed >= 3) astaCheck.style.display='flex';
+  // unlock Turkestan visually
+  if (state.coins >= 50) {
+    const tn = document.getElementById('qn-turkestan');
+    if (tn) { tn.classList.remove('locked'); tn.classList.add('open'); tn.querySelector('.quest-lock-icon') && (tn.querySelector('.quest-lock-icon').style.display='none'); }
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  COMBO SYSTEM
+// ════════════════════════════════════════════════════
+let comboCount = 0;
+let comboTimeout;
+
+function registerCorrect(x, y) {
+  comboCount++;
+  clearTimeout(comboTimeout);
+  comboTimeout = setTimeout(() => { comboCount = 0; }, 4000);
+  if (comboCount >= 2) {
+    showComboBanner(comboCount);
+    floatComboText(x || window.innerWidth/2, y || 200, comboCount);
+  }
+}
+function registerWrong() { comboCount = 0; }
+
+function showComboBanner(n) {
+  const labels = ['','','🔥 x2 Комбо!','⚡ x3 Супер!','💥 x4 Огонь!','🌟 x5 ЛЕГЕНДА!'];
+  const txt = labels[Math.min(n, labels.length-1)] || `🏆 x${n} МАКС!`;
+  const el = document.getElementById('combo-banner');
+  el.textContent = txt;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function floatComboText(x, y, n) {
+  const el = document.createElement('div');
+  el.className = 'combo-float';
+  el.textContent = `+${n*2}🪙 COMBO`;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+// ════════════════════════════════════════════════════
+//  GAME: REACTION — Поймай конфеты
+// ════════════════════════════════════════════════════
+let reactScore = 0, reactCombo = 0, reactTimer = null, reactSpawnTimer = null, reactTimeLeft = 20;
+const CANDIES_REACT = ['🍬','🍭','🍫','🍩','🧁','⭐','💎'];
+const BAD_ITEMS     = ['💣','🌵','🦂'];
+
+function startReactionGame() {
+  reactScore = 0; reactCombo = 1; reactTimeLeft = 20;
+  document.getElementById('react-score').textContent = 0;
+  document.getElementById('react-combo').textContent = 'x1';
+  document.getElementById('react-timer').textContent = 20;
+  document.getElementById('react-timer-bar').style.width = '100%';
+  document.getElementById('react-start-btn').style.display = 'none';
+  document.getElementById('react-start-hint').style.display = 'none';
+  document.getElementById('react-arena').innerHTML = '';
+  document.getElementById('react-coins').textContent = state.coins;
+  clearInterval(reactTimer);
+  clearInterval(reactSpawnTimer);
+  reactTimer = setInterval(() => {
+    reactTimeLeft--;
+    document.getElementById('react-timer').textContent = reactTimeLeft;
+    document.getElementById('react-timer-bar').style.width = (reactTimeLeft/20*100)+'%';
+    if (reactTimeLeft <= 0) {
+      clearInterval(reactTimer);
+      clearInterval(reactSpawnTimer);
+      const earned = Math.floor(reactScore * 1.5);
+      addCoins(earned);
+      state.gamesPlayed++;
+      saveState();
+      showResult('⚡', state.lang==='ru'?'Реакция огонь!':'Жылдамдық керемет!', earned,
+        state.lang==='ru'?`Поймал ${reactScore} конфет!`:`${reactScore} кәмпит ұсталды!`);
+      document.getElementById('react-start-btn').style.display = 'block';
+    }
+  }, 1000);
+  reactSpawnTimer = setInterval(spawnReactTarget, 800);
+  spawnReactTarget();
+}
+
+function spawnReactTarget() {
+  const arena = document.getElementById('react-arena');
+  if (!arena) return;
+  const isBad  = Math.random() < 0.2;
+  const emojis = isBad ? BAD_ITEMS : CANDIES_REACT;
+  const emoji  = emojis[Math.floor(Math.random() * emojis.length)];
+  const colors = isBad
+    ? ['#FF5252','#FF1744']
+    : ['#FFD23F','#FF6B35','#9C27B0','#2196F3','#4CAF50'];
+  const c1 = colors[Math.floor(Math.random()*colors.length)];
+  const c2 = colors[Math.floor(Math.random()*colors.length)];
+  const el = document.createElement('div');
+  el.className = 'reaction-target';
+  const maxX = arena.clientWidth  - 110;
+  const maxY = arena.clientHeight - 110;
+  el.style.left   = (10 + Math.random()*maxX) + 'px';
+  el.style.top    = (10 + Math.random()*maxY) + 'px';
+  el.style.background = `linear-gradient(135deg,${c1},${c2})`;
+  el.textContent = emoji;
+  const lifeMs = 1200 + Math.random()*600;
+  el.onclick = (e) => {
+    e.stopPropagation();
+    if (isBad) {
+      reactCombo = 1;
+      document.getElementById('react-combo').textContent = 'x1';
+      el.style.animation = 'shake 0.3s';
+      registerWrong();
+    } else {
+      reactScore += reactCombo;
+      reactCombo = Math.min(reactCombo + 1, 5);
+      document.getElementById('react-score').textContent = reactScore;
+      document.getElementById('react-combo').textContent = 'x'+reactCombo;
+      if (reactCombo >= 2) floatComboText(e.clientX, e.clientY, reactCombo);
+      registerCorrect(e.clientX, e.clientY);
+    }
+    el.remove();
+  };
+  setTimeout(() => el.remove(), lifeMs);
+  arena.appendChild(el);
+}
+
+// ════════════════════════════════════════════════════
+//  GAME: QUIZ STORY — КамБот путешествует
+// ════════════════════════════════════════════════════
+const QUIZ_STORY = [
+  { art:'🌅', text:'КамБот просыпается в степи. Ему нужно найти воду. Что поможет найти оазис?', choices:[{t:'🌴 Пальмы и зелень',ok:true,tip:'Верно! Пальмы растут у воды.'},{t:'🏔️ Высокие горы',ok:false,tip:'В горах воды меньше.'},{t:'🌵 Кактусы',ok:false,tip:'Кактусы живут без воды!'}] },
+  { art:'🐪', text:'КамБот встречает других верблюдов. Верблюд может не пить сколько дней?', choices:[{t:'🌊 1 день',ok:false,tip:'Верблюды намного выносливее!'},{t:'☀️ До 7 дней',ok:true,tip:'Правильно! Верблюды очень выносливы.'},{t:'💧 Только полчаса',ok:false,tip:'Это неверно для верблюдов.'}] },
+  { art:'🏛️', text:'КамБот добрался до Туркестана. Кто построил знаменитый мавзолей?', choices:[{t:'👑 Тамерлан',ok:true,tip:'Молодец! Мавзолей Ясауи построен при Тамерлане.'},{t:'🦅 Чингисхан',ok:false,tip:'Нет, Чингисхан жил раньше.'},{t:'🎨 Художники',ok:false,tip:'Не совсем — его заказал правитель.'}] },
+  { art:'🍬', text:'КамБот нашёл магазин Баян Сулу! Сколько конфет можно купить на 100 тенге если 1 конфета стоит 20 тенге?', choices:[{t:'🍬 3 конфеты',ok:false,tip:'Посчитай: 100 ÷ 20 = ?'},{t:'🍬🍬🍬🍬🍬 5 конфет',ok:true,tip:'Верно! 100 ÷ 20 = 5 конфет.'},{t:'🍬🍬 2 конфеты',ok:false,tip:'Нет, больше!'}] },
+  { art:'🌟', text:'КамБот вернулся домой с победой! Какой цвет флага Казахстана?', choices:[{t:'🔵 Голубой и жёлтый',ok:true,tip:'Правильно! Голубой — небо, жёлтый — солнце.'},{t:'🔴 Красный и белый',ok:false,tip:'Нет, это другие страны.'},{t:'🟢 Зелёный',ok:false,tip:'Нет, это не Казахстан.'}] },
+];
+
+let quizIndex = 0, quizScore = 0;
+
+function startQuizGame() {
+  quizIndex = 0; quizScore = 0;
+  document.getElementById('quiz-coins').textContent = state.coins;
+  buildQuizSteps();
+  renderQuizStep();
+  showScreen('game-quiz');
+}
+
+function buildQuizSteps() {
+  const el = document.getElementById('quiz-steps');
+  el.innerHTML = '';
+  QUIZ_STORY.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'quiz-step-dot' + (i===0?' active':'');
+    d.id = 'qsdot-'+i;
+    el.appendChild(d);
+  });
+}
+
+function renderQuizStep() {
+  const step = QUIZ_STORY[quizIndex];
+  document.getElementById('quiz-progress').textContent =
+    (state.lang==='ru'?'Шаг ':'Қадам ') + (quizIndex+1) + (state.lang==='ru'?' из ':' / ') + QUIZ_STORY.length;
+  const art  = document.getElementById('quiz-art');
+  const text = document.getElementById('quiz-text');
+  art.style.animation  = 'none';
+  text.style.animation = 'none';
+  requestAnimationFrame(() => {
+    art.style.animation  = 'wordPop 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+    text.style.animation = 'screenEnter 0.3s ease';
+  });
+  art.textContent  = step.art;
+  text.textContent = step.text;
+  const choices = document.getElementById('quiz-choices');
+  choices.innerHTML = '';
+  step.choices.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-choice';
+    btn.innerHTML = `<span style="font-size:20px;">${c.ok?'❓':'❓'}</span> ${c.t}`;
+    btn.onclick = () => answerQuiz(btn, c.ok, c.tip, choices);
+    choices.appendChild(btn);
+  });
+}
+
+function answerQuiz(btn, correct, tip, container) {
+  container.querySelectorAll('.quiz-choice').forEach(b => b.onclick=null);
+  btn.classList.add(correct?'chosen-correct':'chosen-wrong');
+  btn.innerHTML = `<span style="font-size:20px;">${correct?'✅':'❌'}</span> ${btn.textContent.slice(1)}`;
+  if (correct) { quizScore++; registerCorrect(); kambotSay('correct'); }
+  else { registerWrong(); kambotSay('wrong'); }
+  // show tip
+  const tipEl = document.createElement('div');
+  tipEl.style.cssText='background:#F8F8F8;border-radius:12px;padding:10px 14px;font-size:13px;color:#555;margin-top:6px;animation:screenEnter 0.3s ease;';
+  tipEl.textContent = '💡 '+tip;
+  container.appendChild(tipEl);
+  // advance
+  const dot = document.getElementById('qsdot-'+quizIndex);
+  if (dot) { dot.classList.remove('active'); dot.classList.add(correct?'done':''); dot.style.background=correct?'#4CAF50':'#F44336'; }
+  quizIndex++;
+  if (quizIndex < QUIZ_STORY.length) {
+    const nextDot = document.getElementById('qsdot-'+quizIndex);
+    if (nextDot) nextDot.classList.add('active');
+    setTimeout(renderQuizStep, 1400);
+  } else {
+    setTimeout(() => {
+      const earned = quizScore * 5 + 5;
+      addCoins(earned); state.gamesPlayed++; saveState();
+      showResult('📖', state.lang==='ru'?'История пройдена!':'Тарих аяқталды!', earned,
+        state.lang==='ru'?`Правильных: ${quizScore}/${QUIZ_STORY.length}`:`Дұрыс: ${quizScore}/${QUIZ_STORY.length}`);
+    }, 1400);
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  GAME: SORT — Drag & Drop (touch + mouse)
+// ════════════════════════════════════════════════════
+const SORT_SETS = [
+  {
+    a: { icon:'🍬', label:{ru:'Сладости Бота',kz:'Бота тәттілері'}, items:['🍬','🍭','🍫','🧁'] },
+    b: { icon:'🐾', label:{ru:'Животные КZ',kz:'KZ жануарлары'},  items:['🐪','🦅','🐺','🦌'] },
+  },
+  {
+    a: { icon:'🌿', label:{ru:'Природа',kz:'Табиғат'},     items:['🌲','🌸','🌵','🏔️'] },
+    b: { icon:'🏙️', label:{ru:'Города',kz:'Қалалар'},    items:['🗼','🏛️','🕌','🏟️'] },
+  },
+];
+let sortSet, sortRemaining, sortDragItem=null;
+
+function startSortGame() {
+  sortSet = SORT_SETS[Math.floor(Math.random()*SORT_SETS.length)];
+  const lang = state.lang;
+  document.getElementById('sort-coins').textContent = state.coins;
+  document.getElementById('sort-basket-a-icon').textContent  = sortSet.a.icon;
+  document.getElementById('sort-basket-a-label').textContent = sortSet.a.label[lang];
+  document.getElementById('sort-basket-b-icon').textContent  = sortSet.b.icon;
+  document.getElementById('sort-basket-b-label').textContent = sortSet.b.label[lang];
+  const allItems = shuffle([...sortSet.a.items.map(e=>({e,cat:'a'})), ...sortSet.b.items.map(e=>({e,cat:'b'}))]);
+  sortRemaining = allItems.length;
+  document.getElementById('sort-progress').textContent = (lang==='ru'?'Осталось: ':'Қалды: ') + sortRemaining;
+  document.getElementById('sort-basket-a').querySelectorAll('.sort-item').forEach(el=>el.remove());
+  document.getElementById('sort-basket-b').querySelectorAll('.sort-item').forEach(el=>el.remove());
+  const row = document.getElementById('sort-items-row');
+  row.innerHTML = '';
+  allItems.forEach(({e, cat}) => {
+    const el = document.createElement('div');
+    el.className = 'sort-item drag-item';
+    el.textContent = e;
+    el.dataset.cat = cat;
+    el.draggable = true;
+    // mouse drag
+    el.addEventListener('dragstart', ev => { sortDragItem = el; el.classList.add('dragging'); ev.dataTransfer.effectAllowed='move'; ev.dataTransfer.setData('text',''); });
+    el.addEventListener('dragend',   ()  => { el.classList.remove('dragging'); sortDragItem=null; });
+    // touch drag
+    el.addEventListener('touchstart', touchDragStart, {passive:false});
+    el.addEventListener('touchmove',  touchDragMove,  {passive:false});
+    el.addEventListener('touchend',   touchDragEnd,   {passive:false});
+    row.appendChild(el);
+  });
+  showScreen('game-sort');
+}
+
+function dropToBasket(ev, cat) {
+  ev.preventDefault();
+  const basket = document.getElementById('sort-basket-'+cat);
+  basket.classList.remove('over');
+  if (!sortDragItem) return;
+  const isCorrect = sortDragItem.dataset.cat === cat;
+  if (isCorrect) {
+    basket.classList.add('correct-drop');
+    setTimeout(()=>basket.classList.remove('correct-drop'),600);
+    sortDragItem.classList.remove('drag-item');
+    sortDragItem.style.cssText='font-size:28px;animation:popIn 0.3s ease;';
+    basket.appendChild(sortDragItem);
+    sortRemaining--;
+    registerCorrect(); kambotSay('correct');
+    document.getElementById('sort-progress').textContent=(state.lang==='ru'?'Осталось: ':'Қалды: ')+sortRemaining;
+    if (sortRemaining===0) {
+      setTimeout(()=>{
+        const earned=25; addCoins(earned); state.gamesPlayed++; saveState();
+        showResult('🎯',state.lang==='ru'?'Всё разложил!':'Бәрін реттедің!',earned,state.lang==='ru'?'Отличная сортировка!':'Тамаша сорттау!');
+      },600);
+    }
+  } else {
+    basket.classList.add('wrong-drop');
+    setTimeout(()=>basket.classList.remove('wrong-drop'),500);
+    registerWrong(); kambotSay('wrong');
+  }
+  sortDragItem=null;
+}
+
+// ── Touch drag helpers ──
+let _touchClone=null, _touchEl=null;
+function touchDragStart(e) {
+  e.preventDefault();
+  _touchEl = e.currentTarget;
+  _touchEl.classList.add('dragging');
+  _touchClone = _touchEl.cloneNode(true);
+  _touchClone.style.cssText=`position:fixed;pointer-events:none;z-index:999;opacity:0.85;font-size:36px;transform:translate(-50%,-50%);`;
+  document.body.appendChild(_touchClone);
+  const t=e.touches[0];
+  _touchClone.style.left=t.clientX+'px'; _touchClone.style.top=t.clientY+'px';
+}
+function touchDragMove(e) {
+  e.preventDefault();
+  if (!_touchClone) return;
+  const t=e.touches[0];
+  _touchClone.style.left=t.clientX+'px'; _touchClone.style.top=t.clientY+'px';
+  // highlight drop zones
+  document.querySelectorAll('.drop-zone').forEach(z=>{
+    const r=z.getBoundingClientRect();
+    z.classList.toggle('over', t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom);
+  });
+}
+function touchDragEnd(e) {
+  e.preventDefault();
+  if (!_touchClone||!_touchEl) return;
+  const t=e.changedTouches[0];
+  sortDragItem=_touchEl;
+  document.querySelectorAll('.drop-zone').forEach(z=>{
+    const r=z.getBoundingClientRect();
+    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+      const cat=z.id.replace('sort-basket-','');
+      dropToBasket({preventDefault:()=>{}}, cat);
+    }
+    z.classList.remove('over');
+  });
+  _touchEl.classList.remove('dragging');
+  _touchClone.remove(); _touchClone=null; _touchEl=null; sortDragItem=null;
+}
+
+// ════════════════════════════════════════════════════
+//  PATCH startGame — route to new games
+// ════════════════════════════════════════════════════
+const _origStartGame = startGame;
+window.startGame = function(type) {
+  if (type==='reaction') { document.getElementById('react-coins').textContent=state.coins; document.getElementById('react-start-btn').style.display='block'; document.getElementById('react-arena').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:18px;color:#aaa;font-weight:600;" id="react-start-hint">Нажми СТАРТ!</div>'; showScreen('game-reaction'); kambotSay('start'); return; }
+  if (type==='quiz')     { startQuizGame(); kambotSay('start'); return; }
+  if (type==='sort')     { startSortGame(); kambotSay('start'); return; }
+  _origStartGame(type);
+  kambotSay('start');
+};
+
+// ════════════════════════════════════════════════════
+//  PATCH word answer — add combo + word animation
+// ════════════════════════════════════════════════════
+(function patchWords(){
+  const origRender = renderWordQuestion;
+  window.renderWordQuestion = function() {
+    origRender();
+    const wc = document.getElementById('current-word');
+    if(wc){ wc.classList.remove('new-word'); void wc.offsetWidth; wc.classList.add('new-word'); }
+  };
+})();
+
+// Combo banner element
+document.body.insertAdjacentHTML('beforeend','<div id="combo-banner"></div>');
+
+// Init quest map on load
+updateQuestMap();
+</script>
+</body>
+</html>
